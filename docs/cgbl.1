@@ -1,0 +1,44 @@
+.\" SPDX-FileCopyrightText: 2025 David Jolly <jolly.a.david@gmail.com>
+.\" SPDX-License-Identifier: MIT
+
+.TH CGBL 1 "2025" "CGBL 0.2" "User Commands"
+.SH NAME
+cgbl \- CGBL GameBoy Color Emulator
+
+.SH SYNOPSIS
+.B cgbl
+[\fIoptions\fR] [\fIfile\fR]
+.TP
+\fB\-f\fR, \fB\-\-fullscreen\fR
+Set window fullscreen
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Show help information
+.TP
+\fB\-s\fR, \fB\-\-scale\fR
+Set window scale
+.TP
+\fB\-v\fR, \fB\-\-version\fR
+Show version information
+
+.SH EXAMPLES
+.TP
+\fBcgbl\fR \fIrom.gbc\fR
+Launch with a rom
+.TP
+\fBcgbl\fR --fullscreen \fIrom.gbc\fR
+Launch with a fullscreen window
+.TP
+\fBcgbl\fR --scale [1-8] \fIrom.gbc\fR
+Launch with a scaled window
+
+.SH AUTHORS
+David Jolly <jolly.a.david@gmail.com>
+
+.SH REPORTING BUGS
+Report bugs to <jolly.a.david@gmail.com>
+
+.SH COPYRIGHT
+Copyright (c) 2025 David Jolly
+
+Released under the MIT License

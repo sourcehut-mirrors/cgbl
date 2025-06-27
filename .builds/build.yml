@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: 2025 David Jolly <jolly.a.david@gmail.com>
+# SPDX-License-Identifier: MIT
+
+image: archlinux
+packages:
+  - sdl2
+  - sdl3
+sources:
+  - https://git.sr.ht/~dajolly/cgbl
+environment:
+  BUILD_SUBMITTER: git.sr.ht
+tasks:
+  - build-sdl2: |
+      cd cgbl && make clean && make CLIENT=sdl2
+  - build-sdl3: |
+      cd cgbl && make clean && make CLIENT=sdl3
+triggers:
+  - action: email
+    condition: failure
+    to: David Jolly <jolly.a.david@gmail.com>

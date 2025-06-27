@@ -1,0 +1,46 @@
+/*
+ * SPDX-FileCopyrightText: 2025 David Jolly <jolly.a.david@gmail.com>
+ * SPDX-License-Identifier: MIT
+ */
+
+#ifndef CGBL_AUDIO_H_
+#define CGBL_AUDIO_H_
+
+#include "bus.h"
+
+#define CGBL_AUDIO_CHANNEL_1_ENVELOPE 0xFF12
+#define CGBL_AUDIO_CHANNEL_1_FREQUENCY_HIGH 0xFF14
+#define CGBL_AUDIO_CHANNEL_1_FREQUENCY_LOW 0xFF13
+#define CGBL_AUDIO_CHANNEL_1_LENGTH 0xFF11
+#define CGBL_AUDIO_CHANNEL_1_SWEEP 0xFF10
+#define CGBL_AUDIO_CHANNEL_2_ENVELOPE 0xFF17
+#define CGBL_AUDIO_CHANNEL_2_FREQUENCY_HIGH 0xFF19
+#define CGBL_AUDIO_CHANNEL_2_FREQUENCY_LOW 0xFF18
+#define CGBL_AUDIO_CHANNEL_2_LENGTH 0xFF16
+#define CGBL_AUDIO_CHANNEL_3_CONTROL 0xFF1A
+#define CGBL_AUDIO_CHANNEL_3_FREQUENCY_HIGH 0xFF1E
+#define CGBL_AUDIO_CHANNEL_3_FREQUENCY_LOW 0xFF1D
+#define CGBL_AUDIO_CHANNEL_3_LENGTH 0xFF1B
+#define CGBL_AUDIO_CHANNEL_3_LEVEL 0xFF1C
+#define CGBL_AUDIO_CHANNEL_4_CONTROL 0xFF23
+#define CGBL_AUDIO_CHANNEL_4_ENVELOPE 0xFF21
+#define CGBL_AUDIO_CHANNEL_4_FREQUENCY 0xFF22
+#define CGBL_AUDIO_CHANNEL_4_LENGTH 0xFF20
+#define CGBL_AUDIO_CONTROL 0xFF26
+#define CGBL_AUDIO_MIXER 0xFF25
+#define CGBL_AUDIO_RAM_BEGIN 0xFF30
+#define CGBL_AUDIO_RAM_END 0xFF3F
+#define CGBL_AUDIO_SAMPLES 266
+#define CGBL_AUDIO_VOLUME 0xFF24
+
+#define CGBL_AUDIO_RAM_WIDTH \
+    CGBL_WIDTH(CGBL_AUDIO_RAM_BEGIN, CGBL_AUDIO_RAM_END)
+
+uint8_t cgbl_audio_read(uint16_t address);
+void cgbl_audio_reset(void);
+const float (*cgbl_audio_sample(void))[CGBL_AUDIO_SAMPLES];
+void cgbl_audio_signal(void);
+void cgbl_audio_step(void);
+void cgbl_audio_write(uint16_t address, uint8_t data);
+
+#endif /* CGBL_AUDIO_H_ */
