@@ -865,7 +865,7 @@ cgbl_error_e cgbl_video_step(void)
         {
             cgbl_video_transfer();
         }
-        else if (video.line.x == 260)
+        else if (video.line.x == 240)
         {
             cgbl_video_hblank();
         }
