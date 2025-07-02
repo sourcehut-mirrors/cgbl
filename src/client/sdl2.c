@@ -328,4 +328,4 @@ cgbl_error_e cgbl_client_sync(void)
     return result;
 }
 
-#endif /* CLIENT_sdl3 */
+#endif /* CLIENT_sdl2 */
