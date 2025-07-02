@@ -177,7 +177,7 @@ static cgbl_error_e cgbl_cartridge_ram_reset(cgbl_bank_t *const bank)
     }
     else
     {
-        memset(ram, 0, length);
+        memset(ram, 0, sizeof (*ram));
         ram->magic = CGBL_CARTRIDGE_RAM_MAGIC;
         ram->attribute.version.major = CGBL_VERSION_MAJOR;
         ram->attribute.version.minor = CGBL_VERSION_MINOR;
