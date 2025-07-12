@@ -6,6 +6,21 @@
 #include <string.h>
 #include "audio.h"
 
+static const uint32_t DIVIDER[] = {
+    8, 16, 32, 48, 64, 80, 96, 112,
+};
+
+static const float PULSE[][8] = {
+    { -1.f, -1.f, -1.f, -1.f, -1.f, -1.f, -1.f,  1.f, },
+    { -1.f, -1.f, -1.f, -1.f, -1.f, -1.f,  1.f,  1.f, },
+    { -1.f, -1.f, -1.f, -1.f,  1.f,  1.f,  1.f,  1.f, },
+    {  1.f,  1.f,  1.f,  1.f,  1.f,  1.f, -1.f, -1.f, },
+};
+
+static const uint8_t SHIFT[] = {
+    4, 0, 1, 2,
+};
+
 static struct {
     uint32_t cycle;
     uint16_t delay;
@@ -213,21 +228,6 @@ static struct {
         uint8_t raw;
     } volume;
 } audio = {};
-
-static const uint32_t DIVIDER[] = {
-    8, 16, 32, 48, 64, 80, 96, 112,
-};
-
-static const float PULSE[][8] = {
-    { -1.f, -1.f, -1.f, -1.f, -1.f, -1.f, -1.f,  1.f, },
-    { -1.f, -1.f, -1.f, -1.f, -1.f, -1.f,  1.f,  1.f, },
-    { -1.f, -1.f, -1.f, -1.f,  1.f,  1.f,  1.f,  1.f, },
-    {  1.f,  1.f,  1.f,  1.f,  1.f,  1.f, -1.f, -1.f, },
-};
-
-static const uint8_t SHIFT[] = {
-    4, 0, 1, 2,
-};
 
 static void cgbl_audio_channel_1_envelope(void)
 {
