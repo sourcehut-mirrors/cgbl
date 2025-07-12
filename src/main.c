@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     bool fullscreen = false;
     const char *path = NULL;
     cgbl_error_e result = CGBL_SUCCESS;
-    while ((option = getopt_long(argc, argv, "fhp:s:v", OPTION, NULL)) != -1)
+    while ((option = getopt_long(argc, argv, "fhs:v", OPTION, NULL)) != -1)
     {
         switch (option)
         {
