@@ -73,7 +73,7 @@ void cgbl_serial_write(uint16_t address, uint8_t data)
     switch (address)
     {
         case CGBL_SERIAL_CONTROL:
-            serial.control.raw = (data & 0x83) | 0x7C;
+            serial.control.raw = data | 0x7C;
             serial.divider = 0;
             serial.overflow = false;
             break;

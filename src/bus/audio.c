@@ -221,9 +221,9 @@ static struct {
     union {
         struct {
             uint8_t right : 3;
-            uint8_t right_vin : 1;
+            uint8_t : 1;
             uint8_t left : 3;
-            uint8_t left_vin : 1;
+            uint8_t : 1;
         };
         uint8_t raw;
     } volume;
@@ -689,7 +689,7 @@ void cgbl_audio_write(uint16_t address, uint8_t data)
         case CGBL_AUDIO_CHANNEL_1_FREQUENCY_HIGH:
             if (audio.control.enabled)
             {
-                audio.channel_1.frequency.high.raw = (data & 0xC7) | 0x38;
+                audio.channel_1.frequency.high.raw = data | 0x38;
                 cgbl_audio_channel_1_trigger();
             }
             break;
@@ -708,7 +708,7 @@ void cgbl_audio_write(uint16_t address, uint8_t data)
         case CGBL_AUDIO_CHANNEL_1_SWEEP:
             if (audio.control.enabled)
             {
-                audio.channel_1.sweep.raw = (data & 0x7F) | 0x80;
+                audio.channel_1.sweep.raw = data | 0x80;
             }
             break;
         case CGBL_AUDIO_CHANNEL_2_ENVELOPE:
@@ -720,7 +720,7 @@ void cgbl_audio_write(uint16_t address, uint8_t data)
         case CGBL_AUDIO_CHANNEL_2_FREQUENCY_HIGH:
             if (audio.control.enabled)
             {
-                audio.channel_2.frequency.high.raw = (data & 0xC7) | 0x38;
+                audio.channel_2.frequency.high.raw = data | 0x38;
                 cgbl_audio_channel_2_trigger();
             }
             break;
@@ -739,7 +739,7 @@ void cgbl_audio_write(uint16_t address, uint8_t data)
         case CGBL_AUDIO_CHANNEL_3_CONTROL:
             if (audio.control.enabled)
             {
-                audio.channel_3.control.raw = (data & 0x80) | 0x7F;
+                audio.channel_3.control.raw = data | 0x7F;
                 if (!audio.channel_3.control.enabled)
                 {
                     audio.control.channel_3_enabled = false;
@@ -749,7 +749,7 @@ void cgbl_audio_write(uint16_t address, uint8_t data)
         case CGBL_AUDIO_CHANNEL_3_FREQUENCY_HIGH:
             if (audio.control.enabled)
             {
-                audio.channel_3.frequency.high.raw = (data & 0xC7) | 0x38;
+                audio.channel_3.frequency.high.raw = data | 0x38;
                 cgbl_audio_channel_3_trigger();
             }
             break;
@@ -768,13 +768,13 @@ void cgbl_audio_write(uint16_t address, uint8_t data)
         case CGBL_AUDIO_CHANNEL_3_LEVEL:
             if (audio.control.enabled)
             {
-                audio.channel_3.level.raw = (data & 0x60) | 0x9F;
+                audio.channel_3.level.raw = data | 0x9F;
             }
             break;
         case CGBL_AUDIO_CHANNEL_4_CONTROL:
             if (audio.control.enabled)
             {
-                audio.channel_4.control.raw = (data & 0xC0) | 0x3F;
+                audio.channel_4.control.raw = data | 0x3F;
                 cgbl_audio_channel_4_trigger();
             }
             break;
@@ -793,11 +793,11 @@ void cgbl_audio_write(uint16_t address, uint8_t data)
         case CGBL_AUDIO_CHANNEL_4_LENGTH:
             if (audio.control.enabled)
             {
-                audio.channel_4.length.raw = (data & 0x3F) | 0xC0;
+                audio.channel_4.length.raw = data | 0xC0;
             }
             break;
         case CGBL_AUDIO_CONTROL:
-            audio.control.enabled = ((data & 0x80) == 0x80);
+            audio.control.raw |= data & 0x80;
             if (!audio.control.enabled)
             {
                 memset(&audio.channel_1, 0, sizeof (audio.channel_1));

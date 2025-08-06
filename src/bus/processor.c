@@ -143,10 +143,7 @@ typedef enum {
 
 typedef union {
     struct {
-        uint8_t vblank : 1;
-        uint8_t screen : 1;
-        uint8_t timer : 1;
-        uint8_t serial : 1;
+        uint8_t : 4;
         uint8_t input : 1;
     };
     uint8_t raw;
@@ -2311,7 +2308,7 @@ void cgbl_processor_write(uint16_t address, uint8_t data)
             processor.interrupt.enable.raw = data;
             break;
         case CGBL_PROCESSOR_INTERRUPT_FLAG:
-            processor.interrupt.flag.raw = (data & 0x1F) | 0xE0;
+            processor.interrupt.flag.raw = data | 0xE0;
             if (processor.interrupt.flag.input)
             {
                 processor.stopped = false;

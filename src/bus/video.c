@@ -9,32 +9,26 @@
 #include "processor.h"
 #include "video.h"
 
-typedef union {
-    struct {
-        uint8_t palette : 3;
-        uint8_t bank : 1;
-        uint8_t : 1;
-        uint8_t flip_x : 1;
-        uint8_t flip_y : 1;
-        uint8_t priority : 1;
-    };
-    uint8_t raw;
+typedef struct {
+    uint8_t palette : 3;
+    uint8_t bank : 1;
+    uint8_t : 1;
+    uint8_t flip_x : 1;
+    uint8_t flip_y : 1;
+    uint8_t priority : 1;
 } cgbl_background_t;
 
 typedef struct {
     uint8_t y;
     uint8_t x;
     uint8_t id;
-    union {
-        struct {
-            uint8_t palette : 3;
-            uint8_t bank : 1;
-            uint8_t palette_dmg : 1;
-            uint8_t flip_x : 1;
-            uint8_t flip_y : 1;
-            uint8_t priority : 1;
-        };
-        uint8_t raw;
+    struct {
+        uint8_t palette : 3;
+        uint8_t bank : 1;
+        uint8_t palette_dmg : 1;
+        uint8_t flip_x : 1;
+        uint8_t flip_y : 1;
+        uint8_t priority : 1;
     } attribute;
 } cgbl_object_t;
 
@@ -156,6 +150,7 @@ static struct {
 };
 
 static struct {
+    bool shown;
     struct {
         union {
             struct {
@@ -671,27 +666,30 @@ static void cgbl_video_hblank(void)
     video.status.mode = 0;
     if (video.control.enabled)
     {
-        if (cgbl_bus_mode() == CGBL_MODE_CGB)
-        {
-            if (video.transfer.active)
-            {
-                cgbl_video_transfer_hblank();
-            }
-            cgbl_video_cgb_background_render();
-        }
-        else if (video.control.background_enabled)
-        {
-            cgbl_video_dmg_background_render();
-        }
-        if (video.control.object_enabled)
+        if (video.shown)
         {
             if (cgbl_bus_mode() == CGBL_MODE_CGB)
             {
-                cgbl_video_cgb_object_render();
+                if (video.transfer.active)
+                {
+                    cgbl_video_transfer_hblank();
+                }
+                cgbl_video_cgb_background_render();
             }
-            else
+            else if (video.control.background_enabled)
             {
-                cgbl_video_dmg_object_render();
+                cgbl_video_dmg_background_render();
+            }
+            if (video.control.object_enabled)
+            {
+                if (cgbl_bus_mode() == CGBL_MODE_CGB)
+                {
+                    cgbl_video_cgb_object_render();
+                }
+                else
+                {
+                    cgbl_video_dmg_object_render();
+                }
             }
         }
         if (video.status.interrupt_hblank)
@@ -884,6 +882,7 @@ cgbl_error_e cgbl_video_step(void)
         if (++video.line.y == 154)
         {
             video.line.y = 0;
+            video.shown = true;
             video.window.counter = 0;
             result = CGBL_QUIT;
         }
@@ -897,6 +896,10 @@ void cgbl_video_write(uint16_t address, uint8_t data)
     {
         case CGBL_VIDEO_CONTROL:
             video.control.raw = data;
+            if (!video.control.enabled)
+            {
+                video.shown = false;
+            }
             break;
         case CGBL_VIDEO_LINE_Y_COINCIDENCE:
             video.line.coincidence = data;
@@ -967,7 +970,7 @@ void cgbl_video_write(uint16_t address, uint8_t data)
             video.scroll.y = data;
             break;
         case CGBL_VIDEO_STATUS:
-            video.status.raw = (data & 0x78) | 0x80;
+            video.status.raw |= (data & 0x78) | 0x80;
             break;
         case CGBL_VIDEO_TRANSFER_CONTROL:
             if (cgbl_bus_mode() == CGBL_MODE_CGB)

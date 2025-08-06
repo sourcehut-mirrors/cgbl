@@ -76,7 +76,7 @@ void cgbl_input_write(uint16_t address, uint8_t data)
     switch (address)
     {
         case CGBL_INPUT_STATE:
-            input.state.raw = (data & 0x30) | 0xCF;
+            input.state.raw = data | 0xCF;
             if (!input.state.button)
             {
                 for (cgbl_button_e button = CGBL_BUTTON_A; button <= CGBL_BUTTON_START; ++button)

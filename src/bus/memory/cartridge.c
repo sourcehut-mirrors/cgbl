@@ -53,7 +53,6 @@ typedef struct {
             uint16_t major : 4;
             uint16_t minor : 4;
         } version;
-        uint16_t raw;
     } attribute;
     cgbl_clock_t clock;
     uint8_t data[];
@@ -324,6 +323,7 @@ cgbl_error_e cgbl_cartridge_reset(const cgbl_bank_t *const rom, cgbl_bank_t *con
 {
     cgbl_error_e result = CGBL_SUCCESS;
     memset(&cartridge, 0, sizeof (cartridge));
+    cartridge.clock.delay = 4213440;
     if (ram->data && rom->data)
     {
         if (((result = cgbl_cartridge_rom_reset(rom)) == CGBL_SUCCESS)

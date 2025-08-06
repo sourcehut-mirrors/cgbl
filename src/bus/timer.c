@@ -91,7 +91,7 @@ void cgbl_timer_write(uint16_t address, uint8_t data)
     switch (address)
     {
         case CGBL_TIMER_CONTROL:
-            timer.control.raw = (data & 7) | 0xF8;
+            timer.control.raw = data | 0xF8;
             break;
         case CGBL_TIMER_COUNTER:
             timer.counter = data;
