@@ -970,7 +970,7 @@ void cgbl_video_write(uint16_t address, uint8_t data)
             video.scroll.y = data;
             break;
         case CGBL_VIDEO_STATUS:
-            video.status.raw |= (data & 0x78) | 0x80;
+            video.status.raw |= data & 0x78;
             break;
         case CGBL_VIDEO_TRANSFER_CONTROL:
             if (cgbl_bus_mode() == CGBL_MODE_CGB)
