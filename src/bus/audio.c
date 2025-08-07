@@ -671,7 +671,7 @@ void cgbl_audio_step(void)
         {
             audio.index = 0;
         }
-        audio.delay = 264;
+        audio.delay = 88;
     }
     --audio.delay;
 }
