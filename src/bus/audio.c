@@ -26,7 +26,8 @@ static struct {
     uint16_t delay;
     uint32_t index;
     uint8_t ram[CGBL_AUDIO_RAM_WIDTH];
-    float sample[CGBL_AUDIO_SAMPLES];
+    float downsample[CGBL_AUDIO_SAMPLES];
+    float sample[CGBL_AUDIO_SAMPLES + 63];
     struct {
         uint32_t delay;
         uint8_t position;
@@ -538,6 +539,23 @@ static void cgbl_audio_channel_4_trigger(void)
     }
 }
 
+static void cgbl_audio_downsample(void)
+{
+    uint32_t destination_length = CGBL_LENGTH(audio.downsample), source_length = CGBL_LENGTH(audio.sample);
+    for (uint32_t index = 0; index < destination_length; ++index)
+    {
+        float delta = 0.f, source_index = (float)index * (source_length - 1) / (destination_length - 1);
+        uint32_t index_0 = (uint32_t)source_index, index_1 = index_0 + 1;
+        if (index_1 >= source_length)
+        {
+            index_1 = source_length - 1;
+            index_0 = index_1;
+        }
+        delta = source_index - index_1;
+        audio.downsample[index] = (audio.sample[index_0] * (1.f - delta)) + (audio.sample[index_1] * delta);
+    }
+}
+
 uint8_t cgbl_audio_read(uint16_t address)
 {
     uint8_t result = 0xFF;
@@ -623,7 +641,7 @@ void cgbl_audio_reset(void)
 
 const float (*cgbl_audio_sample(void))[CGBL_AUDIO_SAMPLES]
 {
-    return &audio.sample;
+    return &audio.downsample;
 }
 
 void cgbl_audio_signal(void)
@@ -667,8 +685,9 @@ void cgbl_audio_step(void)
             right *= (audio.volume.right + 1.f) / 8.f;
         }
         audio.sample[audio.index++] = ((left / 4.f) + (right / 4.f)) / 2.f;
-        if (audio.index >= CGBL_AUDIO_SAMPLES)
+        if (audio.index >= CGBL_LENGTH(audio.sample))
         {
+            cgbl_audio_downsample();
             audio.index = 0;
         }
         audio.delay = 88;
