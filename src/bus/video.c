@@ -9,6 +9,14 @@
 #include "processor.h"
 #include "video.h"
 
+typedef enum {
+    CGBL_COLOR_WHITE = 0,
+    CGBL_COLOR_GREY_LIGHT,
+    CGBL_COLOR_GREY_DARK,
+    CGBL_COLOR_BLACK,
+    CGBL_COLOR_MAX,
+} cgbl_color_e;
+
 typedef struct {
     uint8_t palette : 3;
     uint8_t bank : 1;

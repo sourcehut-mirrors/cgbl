@@ -42,14 +42,6 @@
 #define CGBL_VIDEO_RAM_OBJECT_WIDTH \
     (CGBL_WIDTH(CGBL_VIDEO_RAM_OBJECT_BEGIN, CGBL_VIDEO_RAM_OBJECT_END) / sizeof (cgbl_object_t))
 
-typedef enum {
-    CGBL_COLOR_WHITE = 0,
-    CGBL_COLOR_GREY_LIGHT,
-    CGBL_COLOR_GREY_DARK,
-    CGBL_COLOR_BLACK,
-    CGBL_COLOR_MAX,
-} cgbl_color_e;
-
 const uint16_t (*cgbl_video_color(void))[CGBL_VIDEO_HEIGHT][CGBL_VIDEO_WIDTH];
 uint8_t cgbl_video_read(uint16_t address);
 void cgbl_video_reset(void);
