@@ -674,14 +674,15 @@ static void cgbl_video_hblank(void)
     video.status.mode = 0;
     if (video.control.enabled)
     {
+        cgbl_mode_e mode = cgbl_bus_mode();
+        if ((mode == CGBL_MODE_CGB) && video.transfer.active)
+        {
+            cgbl_video_transfer_hblank();
+        }
         if (video.shown)
         {
-            if (cgbl_bus_mode() == CGBL_MODE_CGB)
+            if (mode == CGBL_MODE_CGB)
             {
-                if (video.transfer.active)
-                {
-                    cgbl_video_transfer_hblank();
-                }
                 cgbl_video_cgb_background_render();
             }
             else if (video.control.background_enabled)
@@ -690,7 +691,7 @@ static void cgbl_video_hblank(void)
             }
             if (video.control.object_enabled)
             {
-                if (cgbl_bus_mode() == CGBL_MODE_CGB)
+                if (mode == CGBL_MODE_CGB)
                 {
                     cgbl_video_cgb_object_render();
                 }
@@ -757,6 +758,10 @@ uint8_t cgbl_video_read(uint16_t address)
     {
         case CGBL_VIDEO_CONTROL:
             result = video.control.raw;
+            if (!video.control.enabled)
+            {
+                video.shown = false;
+            }
             break;
         case CGBL_VIDEO_LINE_Y:
             result = video.line.y;
