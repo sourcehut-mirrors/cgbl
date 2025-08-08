@@ -47,11 +47,11 @@ static cgbl_error_e cgbl_client_audio_create(void)
     };
     if (!(client.audio.stream = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &specification, NULL, NULL)))
     {
-        return CGBL_ERROR("SDL_OpenAudioDeviceStream failed -- %s", SDL_GetError());
+        return CGBL_ERROR("SDL_OpenAudioDeviceStream failed: %s", SDL_GetError());
     }
     if (!SDL_ResumeAudioDevice(SDL_GetAudioStreamDevice(client.audio.stream)))
     {
-        return CGBL_ERROR("SDL_ResumeAudioDevice failed -- %s", SDL_GetError());
+        return CGBL_ERROR("SDL_ResumeAudioDevice failed: %s", SDL_GetError());
     }
     return CGBL_SUCCESS;
 }
@@ -69,7 +69,7 @@ static cgbl_error_e cgbl_client_audio_sync(void)
 {
     if (!SDL_PutAudioStreamData(client.audio.stream, cgbl_audio_sample(), CGBL_AUDIO_SAMPLES * sizeof (float)))
     {
-        return CGBL_ERROR("SDL_PutAudioStreamData failed -- %s", SDL_GetError());
+        return CGBL_ERROR("SDL_PutAudioStreamData failed: %s", SDL_GetError());
     }
     return CGBL_SUCCESS;
 }
@@ -178,41 +178,41 @@ static cgbl_error_e cgbl_client_video_create(uint8_t scale, bool fullscreen)
 {
     if ((scale < CGBL_CLIENT_SCALE_MIN) || (scale > CGBL_CLIENT_SCALE_MAX))
     {
-        return CGBL_ERROR("Unsupported scale -- %u", scale);
+        return CGBL_ERROR("Unsupported scale: %u", scale);
     }
     if (!SDL_CreateWindowAndRenderer(cgbl_cartridge_title(), CGBL_VIDEO_WIDTH * scale, CGBL_VIDEO_HEIGHT * scale, SDL_WINDOW_RESIZABLE,
         &client.video.window, &client.video.renderer))
     {
-        return CGBL_ERROR("SDL_CreateWindowAndRenderer failed -- %s", SDL_GetError());
+        return CGBL_ERROR("SDL_CreateWindowAndRenderer failed: %s", SDL_GetError());
     }
     if (!SDL_SetRenderLogicalPresentation(client.video.renderer, CGBL_VIDEO_WIDTH, CGBL_VIDEO_HEIGHT, SDL_LOGICAL_PRESENTATION_INTEGER_SCALE))
     {
-        return CGBL_ERROR("SDL_SetRenderLogicalPresentation failed -- %s", SDL_GetError());
+        return CGBL_ERROR("SDL_SetRenderLogicalPresentation failed: %s", SDL_GetError());
     }
     if (!SDL_SetRenderDrawColor(client.video.renderer, 0, 0, 0, 0))
     {
-        return CGBL_ERROR("SDL_SetRenderDrawColor failed -- %s", SDL_GetError());
+        return CGBL_ERROR("SDL_SetRenderDrawColor failed: %s", SDL_GetError());
     }
     if (!SDL_SetRenderVSync(client.video.renderer, 0))
     {
-        return CGBL_ERROR("SDL_SetRenderVSync failed -- %s", SDL_GetError());
+        return CGBL_ERROR("SDL_SetRenderVSync failed: %s", SDL_GetError());
     }
     if (!(client.video.texture = SDL_CreateTexture(client.video.renderer, SDL_PIXELFORMAT_XBGR1555, SDL_TEXTUREACCESS_STREAMING,
         CGBL_VIDEO_WIDTH, CGBL_VIDEO_HEIGHT)))
     {
-        return CGBL_ERROR("SDL_CreateTexture failed -- %s", SDL_GetError());
+        return CGBL_ERROR("SDL_CreateTexture failed: %s", SDL_GetError());
     }
     if (!SDL_SetTextureScaleMode(client.video.texture, SDL_SCALEMODE_NEAREST))
     {
-        return CGBL_ERROR("SDL_SetTextureScaleMode failed -- %s", SDL_GetError());
+        return CGBL_ERROR("SDL_SetTextureScaleMode failed: %s", SDL_GetError());
     }
     if (!SDL_SetWindowFullscreen(client.video.window, fullscreen))
     {
-        return CGBL_ERROR("SDL_SetWindowFullscreen failed -- %s", SDL_GetError());
+        return CGBL_ERROR("SDL_SetWindowFullscreen failed: %s", SDL_GetError());
     }
     if (fullscreen && !SDL_HideCursor())
     {
-        return CGBL_ERROR("SDL_HideCursor failed -- %s", SDL_GetError());
+        return CGBL_ERROR("SDL_HideCursor failed: %s", SDL_GetError());
     }
     return CGBL_SUCCESS;
 }
@@ -237,19 +237,19 @@ static cgbl_error_e cgbl_client_video_sync(void)
 {
     if (!SDL_UpdateTexture(client.video.texture, NULL, cgbl_video_color(), CGBL_VIDEO_WIDTH * sizeof (uint16_t)))
     {
-        return CGBL_ERROR("SDL_UpdateTexture failed -- %s", SDL_GetError());
+        return CGBL_ERROR("SDL_UpdateTexture failed: %s", SDL_GetError());
     }
     if (!SDL_RenderClear(client.video.renderer))
     {
-        return CGBL_ERROR("SDL_RenderClear failed -- %s", SDL_GetError());
+        return CGBL_ERROR("SDL_RenderClear failed: %s", SDL_GetError());
     }
     if (!SDL_RenderTexture(client.video.renderer, client.video.texture, NULL, NULL))
     {
-        return CGBL_ERROR("SDL_RenderTexture failed -- %s", SDL_GetError());
+        return CGBL_ERROR("SDL_RenderTexture failed: %s", SDL_GetError());
     }
     if (!SDL_RenderPresent(client.video.renderer))
     {
-        return CGBL_ERROR("SDL_RenderPresent failed -- %s", SDL_GetError());
+        return CGBL_ERROR("SDL_RenderPresent failed: %s", SDL_GetError());
     }
     return CGBL_SUCCESS;
 }
@@ -259,7 +259,7 @@ cgbl_error_e cgbl_client_create(uint8_t scale, bool fullscreen)
     cgbl_error_e result = CGBL_SUCCESS;
     if (!SDL_Init(SDL_INIT_AUDIO | SDL_INIT_GAMEPAD | SDL_INIT_VIDEO))
     {
-        return CGBL_ERROR("SDL_Init failed -- %s", SDL_GetError());
+        return CGBL_ERROR("SDL_Init failed: %s", SDL_GetError());
     }
     cgbl_client_frame_begin();
     if (((result = cgbl_client_video_create(scale, fullscreen)) == CGBL_SUCCESS)
