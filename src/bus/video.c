@@ -17,6 +17,14 @@ typedef enum {
     CGBL_COLOR_MAX,
 } cgbl_color_e;
 
+typedef enum {
+    CGBL_STATE_HBLANK = 0,
+    CGBL_STATE_VBLANK,
+    CGBL_STATE_SEARCH,
+    CGBL_STATE_TRANSFER,
+    CGBL_STATE_MAX,
+} cgbl_state_e;
+
 typedef struct {
     uint8_t palette : 3;
     uint8_t bank : 1;
@@ -232,7 +240,7 @@ static struct {
     } scroll;
     union {
         struct {
-            uint8_t mode : 2;
+            uint8_t state : 2;
             uint8_t coincidence : 1;
             uint8_t interrupt_hblank : 1;
             uint8_t interrupt_vblank : 1;
@@ -671,35 +679,12 @@ static void cgbl_video_transfer_objects(void)
 
 static void cgbl_video_hblank(void)
 {
-    video.status.mode = 0;
+    video.status.state = CGBL_STATE_HBLANK;
     if (video.control.enabled)
     {
-        cgbl_mode_e mode = cgbl_bus_mode();
-        if ((mode == CGBL_MODE_CGB) && video.transfer.active)
+        if ((cgbl_bus_mode() == CGBL_MODE_CGB) && video.transfer.active)
         {
             cgbl_video_transfer_hblank();
-        }
-        if (video.shown)
-        {
-            if (mode == CGBL_MODE_CGB)
-            {
-                cgbl_video_cgb_background_render();
-            }
-            else if (video.control.background_enabled)
-            {
-                cgbl_video_dmg_background_render();
-            }
-            if (video.control.object_enabled)
-            {
-                if (mode == CGBL_MODE_CGB)
-                {
-                    cgbl_video_cgb_object_render();
-                }
-                else
-                {
-                    cgbl_video_dmg_object_render();
-                }
-            }
         }
         if (video.status.interrupt_hblank)
         {
@@ -710,32 +695,58 @@ static void cgbl_video_hblank(void)
 
 static void cgbl_video_search(void)
 {
-    video.status.mode = 2;
-    if (video.control.enabled && video.status.interrupt_search)
+    video.status.state = CGBL_STATE_SEARCH;
+    if (video.control.enabled)
     {
-        cgbl_processor_signal(CGBL_INTERRUPT_SCREEN);
+        if (video.control.object_enabled)
+        {
+            if ((cgbl_bus_mode() == CGBL_MODE_CGB) && (cgbl_bus_priority() == CGBL_PRIORITY_CGB))
+            {
+                cgbl_video_cgb_object_search();
+            }
+            else
+            {
+                cgbl_video_dmg_object_search();
+            }
+        }
+        if (video.status.interrupt_search)
+        {
+            cgbl_processor_signal(CGBL_INTERRUPT_SCREEN);
+        }
     }
 }
 
 static void cgbl_video_transfer(void)
 {
-    video.status.mode = 3;
-    if (video.control.enabled && video.control.object_enabled)
+    video.status.state = CGBL_STATE_TRANSFER;
+    if (video.control.enabled && video.shown)
     {
-        if ((cgbl_bus_mode() == CGBL_MODE_CGB) && (cgbl_bus_priority() == CGBL_PRIORITY_CGB))
+        cgbl_mode_e mode = cgbl_bus_mode();
+        if (mode == CGBL_MODE_CGB)
         {
-            cgbl_video_cgb_object_search();
+            cgbl_video_cgb_background_render();
         }
-        else
+        else if (video.control.background_enabled)
         {
-            cgbl_video_dmg_object_search();
+            cgbl_video_dmg_background_render();
+        }
+        if (video.control.object_enabled)
+        {
+            if (mode == CGBL_MODE_CGB)
+            {
+                cgbl_video_cgb_object_render();
+            }
+            else
+            {
+                cgbl_video_dmg_object_render();
+            }
         }
     }
 }
 
 static void cgbl_video_vblank(void)
 {
-    video.status.mode = 1;
+    video.status.state = CGBL_STATE_VBLANK;
     if (video.control.enabled)
     {
         if (video.status.interrupt_vblank)
@@ -779,7 +790,7 @@ uint8_t cgbl_video_read(uint16_t address)
             }
             break;
         case CGBL_VIDEO_PALETTE_BACKGROUND_DATA:
-            if ((cgbl_bus_mode() == CGBL_MODE_CGB) && (!video.control.enabled || (video.status.mode < 3)))
+            if ((cgbl_bus_mode() == CGBL_MODE_CGB) && (!video.control.enabled || (video.status.state < CGBL_STATE_TRANSFER)))
             {
                 result = ((uint8_t *)video.background.color.cgb)[video.background.control.address];
             }
@@ -797,19 +808,19 @@ uint8_t cgbl_video_read(uint16_t address)
             }
             break;
         case CGBL_VIDEO_PALETTE_OBJECT_DATA:
-            if ((cgbl_bus_mode() == CGBL_MODE_CGB) && (!video.control.enabled || (video.status.mode < 3)))
+            if ((cgbl_bus_mode() == CGBL_MODE_CGB) && (!video.control.enabled || (video.status.state < CGBL_STATE_TRANSFER)))
             {
                 result = ((uint8_t *)video.object.color.cgb)[video.object.control.address];
             }
             break;
         case CGBL_VIDEO_RAM_BEGIN ... CGBL_VIDEO_RAM_END:
-            if (!video.control.enabled || (video.status.mode < 3))
+            if (!video.control.enabled || (video.status.state < CGBL_STATE_TRANSFER))
             {
                 result = video.ram.data[(cgbl_bus_mode() == CGBL_MODE_CGB) ? video.ram.bank.select : 0][address - CGBL_VIDEO_RAM_BEGIN];
             }
             break;
         case CGBL_VIDEO_RAM_OBJECT_BEGIN ... CGBL_VIDEO_RAM_OBJECT_END:
-            if (!video.control.enabled || (video.status.mode < 2))
+            if (!video.control.enabled || (video.status.state < CGBL_STATE_SEARCH))
             {
                 result = ((uint8_t *)video.object.ram)[address - CGBL_VIDEO_RAM_OBJECT_BEGIN];
             }
@@ -855,7 +866,7 @@ void cgbl_video_reset(void)
     memset(&video, 0, sizeof (video));
     cgbl_video_dmg_palette_reset();
     video.ram.bank.raw = 0xFE;
-    video.status.raw = 0x82;
+    video.status.raw = 0x80 | CGBL_STATE_SEARCH;
 }
 
 cgbl_error_e cgbl_video_step(void)
@@ -927,7 +938,7 @@ void cgbl_video_write(uint16_t address, uint8_t data)
             }
             break;
         case CGBL_VIDEO_PALETTE_BACKGROUND_DATA:
-            if ((cgbl_bus_mode() == CGBL_MODE_CGB) && (!video.control.enabled || (video.status.mode < 3)))
+            if ((cgbl_bus_mode() == CGBL_MODE_CGB) && (!video.control.enabled || (video.status.state < CGBL_STATE_TRANSFER)))
             {
                 ((uint8_t *)video.background.color.cgb)[video.background.control.address] = data;
                 if (video.background.control.increment)
@@ -949,7 +960,7 @@ void cgbl_video_write(uint16_t address, uint8_t data)
             }
             break;
         case CGBL_VIDEO_PALETTE_OBJECT_DATA:
-            if ((cgbl_bus_mode() == CGBL_MODE_CGB) && (!video.control.enabled || (video.status.mode < 3)))
+            if ((cgbl_bus_mode() == CGBL_MODE_CGB) && (!video.control.enabled || (video.status.state < CGBL_STATE_TRANSFER)))
             {
                 ((uint8_t *)video.object.color.cgb)[video.object.control.address] = data;
                 if (video.object.control.increment)
@@ -959,13 +970,13 @@ void cgbl_video_write(uint16_t address, uint8_t data)
             }
             break;
         case CGBL_VIDEO_RAM_BEGIN ... CGBL_VIDEO_RAM_END:
-            if (!video.control.enabled || (video.status.mode < 3))
+            if (!video.control.enabled || (video.status.state < CGBL_STATE_TRANSFER))
             {
                 video.ram.data[(cgbl_bus_mode() == CGBL_MODE_CGB) ? video.ram.bank.select : 0][address - CGBL_VIDEO_RAM_BEGIN] = data;
             }
             break;
         case CGBL_VIDEO_RAM_OBJECT_BEGIN ... CGBL_VIDEO_RAM_OBJECT_END:
-            if (!video.control.enabled || (video.status.mode < 2))
+            if (!video.control.enabled || (video.status.state < CGBL_STATE_SEARCH))
             {
                 ((uint8_t *)video.object.ram)[address - CGBL_VIDEO_RAM_OBJECT_BEGIN] = data;
             }
