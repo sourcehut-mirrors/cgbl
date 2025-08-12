@@ -26,6 +26,7 @@ sudo make install PREFIX=/your/path
 Usage: cgbl [options] [file]
 
 Options:
+   -d, --debug       Enable debug mode
    -f, --fullscreen  Set window fullscreen
    -h, --help        Show help information
    -s, --scale       Set window scale
@@ -35,6 +36,8 @@ Options:
 ```bash
 # To launch with a rom, run the following command
 cgbl rom.gbc
+# To launch with debug mode enabled, run the following command
+cgbl --debug rom.gbc
 # To launch with a fullscreen window, run the following command
 cgbl --fullscreen rom.gbc
 # To launch with a scaled window, run the following command

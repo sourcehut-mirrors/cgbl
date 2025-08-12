@@ -39,7 +39,7 @@ cgbl_mode_e cgbl_bus_mode(void);
 cgbl_priority_e cgbl_bus_priority(void);
 uint8_t cgbl_bus_read(uint16_t address);
 cgbl_error_e cgbl_bus_reset(const cgbl_bank_t *const rom, cgbl_bank_t *const ram);
-cgbl_error_e cgbl_bus_run(void);
+cgbl_error_e cgbl_bus_run(uint16_t breakpoint);
 cgbl_speed_e cgbl_bus_speed(void);
 bool cgbl_bus_speed_change(void);
 void cgbl_bus_write(uint16_t address, uint8_t data);

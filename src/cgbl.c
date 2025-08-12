@@ -6,8 +6,10 @@
 #include <string.h>
 #include "cartridge.h"
 #include "client.h"
+#include "debug.h"
 
 static struct {
+    const cgbl_option_t *option;
     struct {
         char *path;
         cgbl_bank_t bank;
@@ -78,50 +80,72 @@ static void cgbl_rom_unload(void)
     }
 }
 
-static cgbl_error_e cgbl_run(uint8_t scale, bool fullscreen)
+static cgbl_error_e cgbl_run_debug(void)
+{
+    cgbl_error_e result = CGBL_SUCCESS;
+    if ((result = cgbl_client_sync()) == CGBL_SUCCESS)
+    {
+        result = cgbl_debug_entry(&cgbl.rom.bank, &cgbl.ram.bank);
+    }
+    return result;
+}
+
+static cgbl_error_e cgbl_run_release(void)
+{
+    cgbl_error_e result = CGBL_SUCCESS;
+    for (;;)
+    {
+        if ((result = cgbl_client_poll()) != CGBL_SUCCESS)
+        {
+            if (result == CGBL_QUIT)
+            {
+                result = CGBL_SUCCESS;
+            }
+            break;
+        }
+        if ((result = cgbl_bus_run(0xFFFF)) != CGBL_SUCCESS)
+        {
+            if (result != CGBL_QUIT)
+            {
+                if (result == CGBL_BREAKPOINT)
+                {
+                    result = CGBL_SUCCESS;
+                }
+                break;
+            }
+        }
+        if ((result = cgbl_client_sync()) != CGBL_SUCCESS)
+        {
+            break;
+        }
+    }
+    return result;
+}
+
+static cgbl_error_e cgbl_run(void)
 {
     cgbl_error_e result = CGBL_SUCCESS;
     if ((result = cgbl_bus_reset(&cgbl.rom.bank, &cgbl.ram.bank)) == CGBL_SUCCESS)
     {
-        if ((result = cgbl_client_create(scale, fullscreen)) == CGBL_SUCCESS)
+        if ((result = cgbl_client_create(cgbl.option->scale, cgbl.option->fullscreen)) == CGBL_SUCCESS)
         {
-            for (;;)
-            {
-                if ((result = cgbl_client_poll()) != CGBL_SUCCESS)
-                {
-                    if (result == CGBL_QUIT)
-                    {
-                        result = CGBL_SUCCESS;
-                    }
-                    break;
-                }
-                if ((result = cgbl_bus_run()) != CGBL_SUCCESS)
-                {
-                    if (result != CGBL_QUIT)
-                    {
-                        break;
-                    }
-                }
-                if ((result = cgbl_client_sync()) != CGBL_SUCCESS)
-                {
-                    break;
-                }
-            }
+            result = cgbl.option->debug ? cgbl_run_debug() : cgbl_run_release();
             cgbl_client_destroy();
         }
     }
     return result;
 }
 
-cgbl_error_e cgbl_entry(const char *const path, uint8_t scale, bool fullscreen)
+cgbl_error_e cgbl_entry(const char *const path, const cgbl_option_t *const option)
 {
     cgbl_error_e result = CGBL_SUCCESS;
     memset(&cgbl, 0, sizeof (cgbl));
+    cgbl.option = option;
     if ((result = cgbl_rom_load(path)) == CGBL_SUCCESS)
     {
         if ((result = cgbl_ram_load(path)) == CGBL_SUCCESS)
         {
-            if ((result = cgbl_run(scale, fullscreen)) == CGBL_SUCCESS)
+            if ((result = cgbl_run()) == CGBL_SUCCESS)
             {
                 result = cgbl_ram_save();
             }

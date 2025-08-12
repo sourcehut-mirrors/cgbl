@@ -3,6 +3,7 @@
 
 image: archlinux
 packages:
+  - readline
   - sdl2
   - sdl3
 sources:

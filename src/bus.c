@@ -168,12 +168,12 @@ cgbl_error_e cgbl_bus_reset(const cgbl_bank_t *const rom, cgbl_bank_t *const ram
     return result;
 }
 
-cgbl_error_e cgbl_bus_run(void)
+cgbl_error_e cgbl_bus_run(uint16_t breakpoint)
 {
     cgbl_error_e result = CGBL_SUCCESS;
     for (;;)
     {
-        if ((result = cgbl_processor_step()) != CGBL_SUCCESS)
+        if ((result = cgbl_processor_step(breakpoint)) != CGBL_SUCCESS)
         {
             return result;
         }

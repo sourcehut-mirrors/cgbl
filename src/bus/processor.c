@@ -149,23 +149,6 @@ typedef union {
     uint8_t raw;
 } cgbl_interrupt_t;
 
-typedef union {
-    struct {
-        union {
-            struct {
-                uint8_t : 4;
-                uint8_t carry : 1;
-                uint8_t half_carry : 1;
-                uint8_t negative : 1;
-                uint8_t zero : 1;
-            };
-            uint8_t low;
-        };
-        uint8_t high;
-    };
-    uint16_t word;
-} cgbl_register_t;
-
 static struct {
     bool halt_bug;
     bool halted;
@@ -2222,6 +2205,114 @@ bool cgbl_processor_halted(void)
     return processor.halted;
 }
 
+cgbl_error_e cgbl_processor_register_read(cgbl_register_e reg, cgbl_register_t *const data)
+{
+    cgbl_error_e result = CGBL_SUCCESS;
+    switch (reg)
+    {
+        case CGBL_REGISTER_A:
+            data->low = processor.af.high;
+            break;
+        case CGBL_REGISTER_AF:
+            data->word = processor.af.word;
+            break;
+        case CGBL_REGISTER_B:
+            data->low = processor.bc.high;
+            break;
+        case CGBL_REGISTER_BC:
+            data->word = processor.bc.word;
+            break;
+        case CGBL_REGISTER_C:
+            data->low = processor.bc.low;
+            break;
+        case CGBL_REGISTER_D:
+            data->low = processor.de.high;
+            break;
+        case CGBL_REGISTER_DE:
+            data->word = processor.de.word;
+            break;
+        case CGBL_REGISTER_E:
+            data->low = processor.de.low;
+            break;
+        case CGBL_REGISTER_F:
+            data->low = processor.af.low;
+            break;
+        case CGBL_REGISTER_H:
+            data->low = processor.hl.high;
+            break;
+        case CGBL_REGISTER_HL:
+            data->word = processor.hl.word;
+            break;
+        case CGBL_REGISTER_L:
+            data->low = processor.hl.low;
+            break;
+        case CGBL_REGISTER_PC:
+            data->word = processor.pc.word;
+            break;
+        case CGBL_REGISTER_SP:
+            data->word = processor.sp.word;
+            break;
+        default:
+            result = CGBL_ERROR("Invalid register: %u", reg);
+            break;
+    }
+    return result;
+}
+
+cgbl_error_e cgbl_processor_register_write(cgbl_register_e reg, const cgbl_register_t *const data)
+{
+    cgbl_error_e result = CGBL_SUCCESS;
+    switch (reg)
+    {
+        case CGBL_REGISTER_A:
+            processor.af.high = data->low;
+            break;
+        case CGBL_REGISTER_AF:
+            processor.af.word = data->word & 0xF0;
+            break;
+        case CGBL_REGISTER_B:
+            processor.bc.high = data->low;
+            break;
+        case CGBL_REGISTER_BC:
+            processor.bc.word = data->word;
+            break;
+        case CGBL_REGISTER_C:
+            processor.bc.low = data->low;
+            break;
+        case CGBL_REGISTER_D:
+            processor.de.high = data->low;
+            break;
+        case CGBL_REGISTER_DE:
+            processor.de.word = data->word;
+            break;
+        case CGBL_REGISTER_E:
+            processor.de.low = data->low;
+            break;
+        case CGBL_REGISTER_F:
+            processor.af.low = data->low & 0xF0;
+            break;
+        case CGBL_REGISTER_H:
+            processor.hl.high = data->low;
+            break;
+        case CGBL_REGISTER_HL:
+            processor.hl.word = data->word;
+            break;
+        case CGBL_REGISTER_L:
+            processor.hl.low = data->low;
+            break;
+        case CGBL_REGISTER_PC:
+            processor.pc.word = data->word;
+            break;
+        case CGBL_REGISTER_SP:
+            processor.sp.word = data->word;
+            break;
+        default:
+            result = CGBL_ERROR("Invalid register: %u", reg);
+            break;
+    }
+    return result;
+}
+
 uint8_t cgbl_processor_read(uint16_t address)
 {
     uint8_t result = 0xFF;
@@ -2251,9 +2342,13 @@ void cgbl_processor_signal(cgbl_interrupt_e interrupt)
         cgbl_processor_read(CGBL_PROCESSOR_INTERRUPT_FLAG) | (1 << interrupt));
 }
 
-cgbl_error_e cgbl_processor_step(void)
+cgbl_error_e cgbl_processor_step(uint16_t breakpoint)
 {
     cgbl_error_e result = CGBL_SUCCESS;
+    if (processor.pc.word == breakpoint)
+    {
+        return CGBL_BREAKPOINT;
+    }
     for (uint8_t cycle = 0; cycle < ((cgbl_bus_speed() == CGBL_SPEED_DOUBLE) ? 2 : 1); ++cycle)
     {
         if (!processor.delay)

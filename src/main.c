@@ -10,6 +10,7 @@
 #include "cgbl.h"
 
 static const char *DESCRIPTION[] = {
+    "Enable debug mode",
     "Set window fullscreen",
     "Show help information",
     "Set window scale",
@@ -17,6 +18,7 @@ static const char *DESCRIPTION[] = {
 };
 
 static const struct option OPTION[] = {
+    { "debug", no_argument, NULL, 'd', },
     { "fullscreen", no_argument, NULL, 'f', },
     { "help", no_argument, NULL, 'h', },
     { "scale", required_argument, NULL, 's', },
@@ -50,23 +52,29 @@ static void version(void)
 
 int main(int argc, char *argv[])
 {
-    int option = 0;
-    uint8_t scale = 2;
-    bool fullscreen = false;
+    int index = 0;
     const char *path = NULL;
     cgbl_error_e result = CGBL_SUCCESS;
-    while ((option = getopt_long(argc, argv, "fhs:v", OPTION, NULL)) != -1)
+    cgbl_option_t option = {
+        .debug = false,
+        .fullscreen = false,
+        .scale = 2,
+    };
+    while ((index = getopt_long(argc, argv, "dfhs:v", OPTION, NULL)) != -1)
     {
-        switch (option)
+        switch (index)
         {
+            case 'd':
+                option.debug = true;
+                break;
             case 'f':
-                fullscreen = true;
+                option.fullscreen = true;
                 break;
             case 'h':
                 usage();
                 return CGBL_SUCCESS;
             case 's':
-                scale = strtol(optarg, NULL, 10);
+                option.scale = strtol(optarg, NULL, 10);
                 break;
             case 'v':
                 version();
@@ -77,12 +85,12 @@ int main(int argc, char *argv[])
                 return CGBL_FAILURE;
         }
     }
-    for (option = optind; option < argc; ++option)
+    for (index = optind; index < argc; ++index)
     {
-        path = argv[option];
+        path = argv[index];
         break;
     }
-    if ((result = cgbl_entry(path, scale, fullscreen)) != CGBL_SUCCESS)
+    if ((result = cgbl_entry(path, &option)) != CGBL_SUCCESS)
     {
         fprintf(stderr, "%s\n", cgbl_error());
     }

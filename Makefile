@@ -11,12 +11,14 @@ INCLUDES := $(subst src,-Isrc,$(shell find src -type d))
 OBJECTS  := $(patsubst %.c,%.o,$(shell find src -name "*.c"))
 PATCH    := $(shell git rev-parse --short HEAD)
 
+LDFLAGS  := $(shell pkg-config readline --cflags)
+LDLIBS   := $(shell pkg-config readline --libs)
 ifeq ($(CLIENT),sdl2)
-LDFLAGS  := $(shell pkg-config $(CLIENT) --cflags)
-LDLIBS   := $(shell pkg-config $(CLIENT) --libs)
+LDFLAGS  += $(shell pkg-config $(CLIENT) --cflags)
+LDLIBS   += $(shell pkg-config $(CLIENT) --libs)
 else ifeq ($(CLIENT),sdl3)
-LDFLAGS  := $(shell pkg-config $(CLIENT) --cflags)
-LDLIBS   := $(shell pkg-config $(CLIENT) --libs)
+LDFLAGS  += $(shell pkg-config $(CLIENT) --cflags)
+LDLIBS   += $(shell pkg-config $(CLIENT) --libs)
 else
 $(error Unsupported client -- $(CLIENT))
 endif
