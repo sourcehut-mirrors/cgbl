@@ -42,6 +42,7 @@ cgbl_error_e cgbl_bus_reset(const cgbl_bank_t *const rom, cgbl_bank_t *const ram
 cgbl_error_e cgbl_bus_run(uint16_t breakpoint);
 cgbl_speed_e cgbl_bus_speed(void);
 bool cgbl_bus_speed_change(void);
+cgbl_error_e cgbl_bus_step(uint16_t breakpoint);
 void cgbl_bus_write(uint16_t address, uint8_t data);
 
 #endif /* CGBL_BUS_H_ */

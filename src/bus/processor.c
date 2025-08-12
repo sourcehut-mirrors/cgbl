@@ -2378,7 +2378,10 @@ cgbl_error_e cgbl_processor_step(uint16_t breakpoint)
             }
             else if (!processor.halted && !processor.stopped)
             {
-                cgbl_processor_instruction();
+                if ((result = cgbl_processor_instruction()) != CGBL_SUCCESS)
+                {
+                    return result;
+                }
             }
             else
             {
@@ -2386,6 +2389,10 @@ cgbl_error_e cgbl_processor_step(uint16_t breakpoint)
             }
         }
         --processor.delay;
+    }
+    if ((result == CGBL_SUCCESS) && !processor.delay)
+    {
+        result = CGBL_QUIT;
     }
     return result;
 }
