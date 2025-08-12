@@ -238,10 +238,10 @@ void cgbl_cartridge_clock_latch(void)
     memcpy(&cartridge.clock.latch, cartridge.ram.clock, sizeof (*cartridge.ram.clock));
 }
 
-uint8_t cgbl_cartridge_clock_read(cgbl_clock_e address)
+uint8_t cgbl_cartridge_clock_read(cgbl_clock_e clock)
 {
     uint8_t result = 0xFF;
-    switch (address)
+    switch (clock)
     {
         case CGBL_CLOCK_DAY_HIGH:
             result = cartridge.clock.latch.day.high;
@@ -264,9 +264,9 @@ uint8_t cgbl_cartridge_clock_read(cgbl_clock_e address)
     return result;
 }
 
-void cgbl_cartridge_clock_write(cgbl_clock_e address, uint8_t data)
+void cgbl_cartridge_clock_write(cgbl_clock_e clock, uint8_t data)
 {
-    switch (address)
+    switch (clock)
     {
         case CGBL_CLOCK_DAY_HIGH:
             cartridge.ram.clock->day.high = data & 0xC1;

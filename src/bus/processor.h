@@ -56,8 +56,8 @@ typedef union {
 } cgbl_register_t;
 
 bool cgbl_processor_halted(void);
-cgbl_error_e cgbl_processor_register_read(cgbl_register_e address, cgbl_register_t *const data);
-cgbl_error_e cgbl_processor_register_write(cgbl_register_e address, const cgbl_register_t *const data);
+cgbl_error_e cgbl_processor_register_read(cgbl_register_e reg, cgbl_register_t *const data);
+cgbl_error_e cgbl_processor_register_write(cgbl_register_e reg, const cgbl_register_t *const data);
 uint8_t cgbl_processor_read(uint16_t address);
 void cgbl_processor_reset(void);
 void cgbl_processor_signal(cgbl_interrupt_e interrupt);

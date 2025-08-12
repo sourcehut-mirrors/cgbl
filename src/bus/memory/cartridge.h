@@ -31,8 +31,8 @@ typedef enum {
 } cgbl_clock_e;
 
 void cgbl_cartridge_clock_latch(void);
-uint8_t cgbl_cartridge_clock_read(cgbl_clock_e address);
-void cgbl_cartridge_clock_write(cgbl_clock_e address, uint8_t data);
+uint8_t cgbl_cartridge_clock_read(cgbl_clock_e clock);
+void cgbl_cartridge_clock_write(cgbl_clock_e clock, uint8_t data);
 uint8_t cgbl_cartridge_palette_hash(char *const disambiguation);
 uint16_t cgbl_cartridge_ram_count(void);
 uint8_t cgbl_cartridge_ram_read(uint16_t bank, uint16_t address);

@@ -2205,10 +2205,10 @@ bool cgbl_processor_halted(void)
     return processor.halted;
 }
 
-cgbl_error_e cgbl_processor_register_read(cgbl_register_e address, cgbl_register_t *const data)
+cgbl_error_e cgbl_processor_register_read(cgbl_register_e reg, cgbl_register_t *const data)
 {
     cgbl_error_e result = CGBL_SUCCESS;
-    switch (address)
+    switch (reg)
     {
         case CGBL_REGISTER_A:
             data->low = processor.af.high;
@@ -2253,16 +2253,16 @@ cgbl_error_e cgbl_processor_register_read(cgbl_register_e address, cgbl_register
             data->word = processor.sp.word;
             break;
         default:
-            result = CGBL_ERROR("Invalid register: %u", address);
+            result = CGBL_ERROR("Invalid register: %u", reg);
             break;
     }
     return result;
 }
 
-cgbl_error_e cgbl_processor_register_write(cgbl_register_e address, const cgbl_register_t *const data)
+cgbl_error_e cgbl_processor_register_write(cgbl_register_e reg, const cgbl_register_t *const data)
 {
     cgbl_error_e result = CGBL_SUCCESS;
-    switch (address)
+    switch (reg)
     {
         case CGBL_REGISTER_A:
             processor.af.high = data->low;
@@ -2307,7 +2307,7 @@ cgbl_error_e cgbl_processor_register_write(cgbl_register_e address, const cgbl_r
             processor.sp.word = data->word;
             break;
         default:
-            result = CGBL_ERROR("Invalid register: %u", address);
+            result = CGBL_ERROR("Invalid register: %u", reg);
             break;
     }
     return result;
