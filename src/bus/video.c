@@ -25,45 +25,7 @@ typedef enum {
     CGBL_STATE_MAX,
 } cgbl_state_e;
 
-typedef struct {
-    uint8_t palette : 3;
-    uint8_t bank : 1;
-    uint8_t : 1;
-    uint8_t flip_x : 1;
-    uint8_t flip_y : 1;
-    uint8_t priority : 1;
-} cgbl_background_t;
-
-typedef struct {
-    uint8_t y;
-    uint8_t x;
-    uint8_t id;
-    struct {
-        uint8_t palette : 3;
-        uint8_t bank : 1;
-        uint8_t palette_dmg : 1;
-        uint8_t flip_x : 1;
-        uint8_t flip_y : 1;
-        uint8_t priority : 1;
-    } attribute;
-} cgbl_object_t;
-
-typedef struct {
-    uint8_t index;
-    const cgbl_object_t *object;
-} cgbl_object_entry_t;
-
-typedef union {
-    struct {
-        uint8_t white : 2;
-        uint8_t grey_light : 2;
-        uint8_t grey_dark : 2;
-        uint8_t black : 2;
-    };
-    uint8_t raw;
-} cgbl_palette_t;
-
-static struct {
+static const struct {
     uint8_t hash;
     char disambiguation;
     uint16_t background[CGBL_COLOR_MAX];
@@ -165,6 +127,44 @@ static struct {
     { 0x00, '\0', { 0x7FFF, 0x1BEF, 0x6180, 0x0000, }, { { 0x7FFF, 0x421F, 0x1CF2, 0x0000, }, { 0x7FFF, 0x421F, 0x1CF2, 0x0000, }, }, },
 };
 
+typedef struct {
+    uint8_t palette : 3;
+    uint8_t bank : 1;
+    uint8_t : 1;
+    uint8_t flip_x : 1;
+    uint8_t flip_y : 1;
+    uint8_t priority : 1;
+} cgbl_background_t;
+
+typedef struct {
+    uint8_t y;
+    uint8_t x;
+    uint8_t id;
+    struct {
+        uint8_t palette : 3;
+        uint8_t bank : 1;
+        uint8_t palette_dmg : 1;
+        uint8_t flip_x : 1;
+        uint8_t flip_y : 1;
+        uint8_t priority : 1;
+    } attribute;
+} cgbl_object_t;
+
+typedef struct {
+    uint8_t index;
+    const cgbl_object_t *object;
+} cgbl_object_entry_t;
+
+typedef union {
+    struct {
+        uint8_t white : 2;
+        uint8_t grey_light : 2;
+        uint8_t grey_dark : 2;
+        uint8_t black : 2;
+    };
+    uint8_t raw;
+} cgbl_palette_t;
+
 static struct {
     bool shown;
     struct {
@@ -178,7 +178,7 @@ static struct {
         } control;
         struct {
             uint16_t cgb[8][CGBL_COLOR_MAX];
-            uint16_t *dmg;
+            const uint16_t *dmg;
             cgbl_palette_t palette;
         } color;
     } background;
@@ -212,7 +212,7 @@ static struct {
         } control;
         struct {
             uint16_t cgb[8][CGBL_COLOR_MAX];
-            uint16_t *dmg[2];
+            const uint16_t *dmg[2];
             cgbl_palette_t palette[2];
         } color;
         struct {
