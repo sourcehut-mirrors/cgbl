@@ -118,20 +118,24 @@ static cgbl_error_e cgbl_debug_command_help(const char **const arguments, uint32
 
 static cgbl_error_e cgbl_debug_command_processor(const char **const arguments, uint32_t length)
 {
+    const cgbl_register_e reg[] = {
+        CGBL_REGISTER_PC, CGBL_REGISTER_SP, CGBL_REGISTER_AF, CGBL_REGISTER_BC,
+        CGBL_REGISTER_DE, CGBL_REGISTER_HL,
+    };
     cgbl_error_e result = CGBL_SUCCESS;
     if (length != 1)
     {
         fprintf(stderr, "Usage: %s\n", NAME[CGBL_COMMAND_PROCESSOR]);
         return CGBL_FAILURE;
     }
-    for (cgbl_register_e reg = 0; reg < CGBL_REGISTER_MAX; ++reg)
+    for (uint32_t index = 0; index < CGBL_LENGTH(reg); ++index)
     {
         cgbl_register_t value = {};
-        if ((result = cgbl_processor_register_read(reg, &value)) != CGBL_SUCCESS)
+        if ((result = cgbl_processor_register_read(reg[index], &value)) != CGBL_SUCCESS)
         {
             break;
         }
-        switch (reg)
+        switch (reg[index])
         {
             case CGBL_REGISTER_AF:
                 fprintf(stdout, "AF: %04X (A: %02X, F: %02X) [%c%c%c%c]\n", value.word, value.high, value.low,
