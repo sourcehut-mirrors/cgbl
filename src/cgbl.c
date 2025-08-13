@@ -9,6 +9,7 @@
 #include "debug.h"
 
 static struct {
+    const char *path;
     const cgbl_option_t *option;
     struct {
         char *path;
@@ -19,12 +20,12 @@ static struct {
     } rom;
 } cgbl = {};
 
-static cgbl_error_e cgbl_ram_load(const char *const path)
+static cgbl_error_e cgbl_ram_load(void)
 {
     cgbl_error_e result = CGBL_SUCCESS;
-    if (path)
+    if (cgbl.path)
     {
-        if ((result = cgbl_string_allocate(&cgbl.ram.path, "%s.ram", path)) == CGBL_SUCCESS)
+        if ((result = cgbl_string_allocate(&cgbl.ram.path, "%s.ram", cgbl.path)) == CGBL_SUCCESS)
         {
             if (cgbl_file_exists(cgbl.ram.path))
             {
@@ -62,12 +63,12 @@ static void cgbl_ram_unload(void)
     }
 }
 
-static cgbl_error_e cgbl_rom_load(const char *const path)
+static cgbl_error_e cgbl_rom_load(void)
 {
     cgbl_error_e result = CGBL_SUCCESS;
-    if (path)
+    if (cgbl.path)
     {
-        result = cgbl_file_read(path, &cgbl.rom.bank.data, &cgbl.rom.bank.length);
+        result = cgbl_file_read(cgbl.path, &cgbl.rom.bank.data, &cgbl.rom.bank.length);
     }
     return result;
 }
@@ -82,12 +83,7 @@ static void cgbl_rom_unload(void)
 
 static cgbl_error_e cgbl_run_debug(void)
 {
-    cgbl_error_e result = CGBL_SUCCESS;
-    if ((result = cgbl_client_sync()) == CGBL_SUCCESS)
-    {
-        result = cgbl_debug_entry(&cgbl.rom.bank, &cgbl.ram.bank);
-    }
-    return result;
+    return cgbl_debug_entry(cgbl.path, &cgbl.rom.bank, &cgbl.ram.bank);
 }
 
 static cgbl_error_e cgbl_run_release(void)
@@ -141,9 +137,10 @@ cgbl_error_e cgbl_entry(const char *const path, const cgbl_option_t *const optio
     cgbl_error_e result = CGBL_SUCCESS;
     memset(&cgbl, 0, sizeof (cgbl));
     cgbl.option = option;
-    if ((result = cgbl_rom_load(path)) == CGBL_SUCCESS)
+    cgbl.path = path;
+    if ((result = cgbl_rom_load()) == CGBL_SUCCESS)
     {
-        if ((result = cgbl_ram_load(path)) == CGBL_SUCCESS)
+        if ((result = cgbl_ram_load()) == CGBL_SUCCESS)
         {
             if ((result = cgbl_run()) == CGBL_SUCCESS)
             {
