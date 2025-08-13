@@ -123,7 +123,7 @@ static void cgbl_cartridge_hash_reset(void)
 static cgbl_error_e cgbl_cartridge_mapper_reset(void)
 {
     uint8_t type = cartridge.rom.data[0x147];
-    for (uint8_t index = 0; index < CGBL_LENGTH(MAPPER); ++index)
+    for (uint8_t index = 1; index < CGBL_LENGTH(MAPPER); ++index)
     {
         if (type == MAPPER[index].type)
         {

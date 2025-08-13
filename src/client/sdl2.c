@@ -181,7 +181,7 @@ static cgbl_error_e cgbl_client_video_create(uint8_t scale, bool fullscreen)
     {
         return CGBL_ERROR("SDL_CreateWindow failed: %s", SDL_GetError());
     }
-    if (!(client.video.renderer = SDL_CreateRenderer(client.video.window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC)))
+    if (!(client.video.renderer = SDL_CreateRenderer(client.video.window, -1, SDL_RENDERER_ACCELERATED | (CGBL_CLIENT_VSYNC ? SDL_RENDERER_PRESENTVSYNC : 0))))
     {
         return CGBL_ERROR("SDL_CreateRenderer failed: %s", SDL_GetError());
     }
@@ -193,7 +193,7 @@ static cgbl_error_e cgbl_client_video_create(uint8_t scale, bool fullscreen)
     {
         return CGBL_ERROR("SDL_SetRenderDrawColor failed: %s", SDL_GetError());
     }
-    if (SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1") == SDL_FALSE)
+    if (SDL_SetHint(SDL_HINT_RENDER_VSYNC, CGBL_CLIENT_VSYNC ? "1" : "0") == SDL_FALSE)
     {
         return CGBL_ERROR("SDL_SetHint failed: %s", SDL_GetError());
     }

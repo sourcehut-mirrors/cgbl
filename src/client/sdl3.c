@@ -193,7 +193,7 @@ static cgbl_error_e cgbl_client_video_create(uint8_t scale, bool fullscreen)
     {
         return CGBL_ERROR("SDL_SetRenderDrawColor failed: %s", SDL_GetError());
     }
-    if (!SDL_SetRenderVSync(client.video.renderer, 1))
+    if (!SDL_SetRenderVSync(client.video.renderer, CGBL_CLIENT_VSYNC ? 1 : 0))
     {
         return CGBL_ERROR("SDL_SetRenderVSync failed: %s", SDL_GetError());
     }
