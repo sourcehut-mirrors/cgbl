@@ -12,7 +12,7 @@ SPDX-License-Identifier: MIT
 ```bash
 git clone https://git.sr.ht/~dajolly/cgbl
 cd cgbl
-# The default client uses the SDL2 library
+# The default client uses the SDL3 library
 # To use a different library, redefine CLIENT
 make CLIENT=[sdl2|sdl3]
 # The default installation directory is /usr/local

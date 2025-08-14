@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: MIT
 
 CC       := gcc
-CLIENT	 := sdl2
-CFLAGS   := -march=native -std=c99 -Wall -Werror -Wextra -Wno-unused-parameter -flto=auto -fpie -O3 -DNDEBUG -DCLIENT_$(CLIENT)
+CLIENT	 := sdl3
+CFLAGS   := -march=native -std=c23 -Wall -Werror -Wextra -Wno-unused-parameter -flto=auto -fpie -O3 -DNDEBUG -DCLIENT_$(CLIENT)
 PREFIX   := /usr/local
 TARGET   := cgbl
 

@@ -12,7 +12,7 @@
 #define CGBL_CLIENT_FRAME_RATE 60
 #define CGBL_CLIENT_SCALE_MAX 8
 #define CGBL_CLIENT_SCALE_MIN 1
-#define CGBL_CLIENT_VSYNC true
+#define CGBL_CLIENT_VSYNC false
 
 cgbl_error_e cgbl_client_create(uint8_t scale, bool fullscreen);
 void cgbl_client_destroy(void);
