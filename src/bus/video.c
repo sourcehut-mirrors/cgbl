@@ -922,6 +922,7 @@ void cgbl_video_write(uint16_t address, uint8_t data)
             video.control.raw = data;
             if (!video.control.enabled)
             {
+                memset(&video.pixel, 0xFF, sizeof (video.pixel));
                 video.shown = false;
             }
             break;

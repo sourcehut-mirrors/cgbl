@@ -16,6 +16,7 @@ typedef enum {
     CGBL_COMMAND_EXIT = 0,
     CGBL_COMMAND_HELP,
     CGBL_COMMAND_PROCESSOR,
+    CGBL_COMMAND_RESET,
     CGBL_COMMAND_RUN,
     CGBL_COMMAND_STEP,
     CGBL_COMMAND_VERSION,
@@ -30,24 +31,6 @@ typedef enum {
     CGBL_MAPPER_5,
     CGBL_MAPPER_MAX,
 } cgbl_mapper_e;
-
-static const char *NAME[] = {
-    "exit",
-    "help",
-    "proc",
-    "run",
-    "step",
-    "ver",
-};
-
-static const char *DESCRIPTION[] = {
-    "Exit debug console",
-    "Display help information",
-    "Display processor information",
-    "Run to breakpoint",
-    "Step to next instruction",
-    "Display version information",
-};
 
 static const struct {
     uint8_t value;
@@ -70,6 +53,21 @@ static const struct {
     { 0xC0, CGBL_MODE_CGB },
 };
 
+static const struct {
+    char *name;
+    char *description;
+    char *usage;
+    uint8_t length;
+} OPTION[CGBL_COMMAND_MAX] = {
+    { .name = "exit", .description = "Exit debug console", .usage = "exit", .length = 1, },
+    { .name = "help", .description = "Display help information", .usage = "help", .length = 1, },
+    { .name = "proc", .description = "Display processor information", .usage = "proc", .length = 1, },
+    { .name = "rst", .description = "Reset bus", .usage = "rst", .length = 1, },
+    { .name = "run", .description = "Run to breakpoint", .usage = "run [breakpoint]", .length = 2, },
+    { .name = "step", .description = "Step to next instruction", .usage = "step [breakpoint]", .length = 2, },
+    { .name = "ver", .description = "Display version information", .usage = "ver", .length = 1, },
+};
+
 static const uint16_t RAM[] = {
     1, 1, 1, 4, 16, 8,
 };
@@ -85,49 +83,34 @@ static struct {
     const cgbl_bank_t *rom;
 } debug = {};
 
-static cgbl_error_e cgbl_debug_command_exit(const char **const arguments, uint32_t length)
+static cgbl_error_e cgbl_debug_command_exit(const char **const arguments, uint8_t length)
 {
-    if (length != 1)
-    {
-        fprintf(stderr, "Usage: %s\n", NAME[CGBL_COMMAND_EXIT]);
-        return CGBL_FAILURE;
-    }
     fprintf(stdout, "Exiting\n");
     return CGBL_SUCCESS;
 }
 
-static cgbl_error_e cgbl_debug_command_help(const char **const arguments, uint32_t length)
+static cgbl_error_e cgbl_debug_command_help(const char **const arguments, uint8_t length)
 {
-    if (length != 1)
-    {
-        fprintf(stderr, "Usage: %s\n", NAME[CGBL_COMMAND_HELP]);
-        return CGBL_FAILURE;
-    }
     for (cgbl_command_e command = 0; command < CGBL_COMMAND_MAX; ++command)
     {
         char buffer[22] = {};
-        snprintf(buffer, sizeof (buffer), "%s", NAME[command]);
+        snprintf(buffer, sizeof (buffer), "%s", OPTION[command].usage);
         for (uint32_t offset = strlen(buffer); offset < sizeof (buffer); ++offset)
         {
             buffer[offset] = (offset == (sizeof (buffer) - 1)) ? '\0' : ' ';
         }
-        fprintf(stdout, "%s%s\n", buffer, DESCRIPTION[command]);
+        fprintf(stdout, "%s%s\n", buffer, OPTION[command].description);
     }
     return CGBL_SUCCESS;
 }
 
-static cgbl_error_e cgbl_debug_command_processor(const char **const arguments, uint32_t length)
+static cgbl_error_e cgbl_debug_command_processor(const char **const arguments, uint8_t length)
 {
     const cgbl_register_e reg[] = {
         CGBL_REGISTER_PC, CGBL_REGISTER_SP, CGBL_REGISTER_AF, CGBL_REGISTER_BC,
         CGBL_REGISTER_DE, CGBL_REGISTER_HL,
     };
     cgbl_error_e result = CGBL_SUCCESS;
-    if (length != 1)
-    {
-        fprintf(stderr, "Usage: %s\n", NAME[CGBL_COMMAND_PROCESSOR]);
-        return CGBL_FAILURE;
-    }
     for (uint32_t index = 0; index < CGBL_LENGTH(reg); ++index)
     {
         cgbl_register_t value = {};
@@ -163,16 +146,16 @@ static cgbl_error_e cgbl_debug_command_processor(const char **const arguments, u
     return result;
 }
 
-static cgbl_error_e cgbl_debug_command_run(const char **const arguments, uint32_t length)
+static cgbl_error_e cgbl_debug_command_reset(const char **const arguments, uint8_t length)
+{
+    return cgbl_bus_reset(debug.rom, debug.ram);
+}
+
+static cgbl_error_e cgbl_debug_command_run(const char **const arguments, uint8_t length)
 {
     uint16_t breakpoint = 0xFFFF;
     cgbl_error_e result = CGBL_SUCCESS;
-    if (length > 2)
-    {
-        fprintf(stderr, "Usage: %s [breakpoint]\n", NAME[CGBL_COMMAND_RUN]);
-        return CGBL_FAILURE;
-    }
-    else if (length == 2)
+    if (length == OPTION[CGBL_COMMAND_RUN].length)
     {
         breakpoint = strtol(arguments[1], NULL, 16);
     }
@@ -206,16 +189,11 @@ static cgbl_error_e cgbl_debug_command_run(const char **const arguments, uint32_
     return result;
 }
 
-static cgbl_error_e cgbl_debug_command_step(const char **const arguments, uint32_t length)
+static cgbl_error_e cgbl_debug_command_step(const char **const arguments, uint8_t length)
 {
     uint16_t breakpoint = 0xFFFF;
     cgbl_error_e result = CGBL_SUCCESS;
-    if (length > 2)
-    {
-        fprintf(stderr, "Usage: %s [breakpoint]\n", NAME[CGBL_COMMAND_STEP]);
-        return CGBL_FAILURE;
-    }
-    else if (length == 2)
+    if (length == OPTION[CGBL_COMMAND_STEP].length)
     {
         breakpoint = strtol(arguments[1], NULL, 16);
     }
@@ -244,26 +222,28 @@ static cgbl_error_e cgbl_debug_command_step(const char **const arguments, uint32
     return result;
 }
 
-static cgbl_error_e cgbl_debug_command_version(const char **const arguments, uint32_t length)
+static cgbl_error_e cgbl_debug_command_version(const char **const arguments, uint8_t length)
 {
     const cgbl_version_t *const version = cgbl_version();
-    if (length != 1)
-    {
-        fprintf(stderr, "Usage: %s\n", NAME[CGBL_COMMAND_VERSION]);
-        return CGBL_FAILURE;
-    }
     fprintf(stdout, "%u.%u-%x\n", version->major, version->minor, version->patch);
     return CGBL_SUCCESS;
 }
 
-static cgbl_error_e (*const COMMAND[CGBL_COMMAND_MAX])(const char **const arguments, uint32_t length) = {
+static cgbl_error_e (*const COMMAND[CGBL_COMMAND_MAX])(const char **const arguments, uint8_t length) = {
     cgbl_debug_command_exit,
     cgbl_debug_command_help,
     cgbl_debug_command_processor,
+    cgbl_debug_command_reset,
     cgbl_debug_command_run,
     cgbl_debug_command_step,
     cgbl_debug_command_version,
 };
+
+static char **cgbl_debug_completion(const char *text, int start, int end)
+{
+    rl_attempted_completion_over = 1;
+    return NULL;
+}
 
 static cgbl_error_e cgbl_debug_header_checksum(void)
 {
@@ -410,6 +390,7 @@ static const char *cgbl_debug_prompt(void)
 cgbl_error_e cgbl_debug_entry(const char *const path, const cgbl_bank_t *const rom, cgbl_bank_t *const ram)
 {
     cgbl_error_e result = CGBL_SUCCESS;
+    rl_attempted_completion_function = cgbl_debug_completion;
     memset(&debug, 0, sizeof (debug));
     debug.path = path;
     debug.ram = ram;
@@ -424,7 +405,7 @@ cgbl_error_e cgbl_debug_entry(const char *const path, const cgbl_bank_t *const r
         cgbl_command_e command = CGBL_COMMAND_MAX;
         if ((input = readline(cgbl_debug_prompt())) && strlen(input))
         {
-            uint32_t length = 0;
+            uint8_t length = 0;
             char *argument = NULL;
             const char *arguments[4] = {};
             add_history(input);
@@ -440,7 +421,7 @@ cgbl_error_e cgbl_debug_entry(const char *const path, const cgbl_bank_t *const r
             }
             for (command = 0; command < CGBL_COMMAND_MAX; ++command)
             {
-                if (!strcmp(input, NAME[command]))
+                if (!strcmp(input, OPTION[command].name))
                 {
                     break;
                 }
@@ -448,7 +429,12 @@ cgbl_error_e cgbl_debug_entry(const char *const path, const cgbl_bank_t *const r
             if (command >= CGBL_COMMAND_MAX)
             {
                 fprintf(stderr, "Command unsupported: \'%s\'\n", input);
-                fprintf(stderr, "Type '%s' for more information\n", NAME[CGBL_COMMAND_HELP]);
+                fprintf(stderr, "Type '%s' for more information\n", OPTION[CGBL_COMMAND_HELP].name);
+            }
+            else if (length > OPTION[command].length)
+            {
+                fprintf(stderr, "Command usage: %s\n", OPTION[command].usage);
+                fprintf(stderr, "Type '%s' for more information\n", OPTION[CGBL_COMMAND_HELP].name);
             }
             else if ((result = COMMAND[command](arguments, length)) == CGBL_FAILURE)
             {

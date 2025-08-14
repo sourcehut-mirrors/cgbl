@@ -51,7 +51,7 @@ void cgbl_input_reset(void)
 
 void cgbl_input_step(void)
 {
-    bool overflow = ++input.divider & 512;
+    bool overflow = ++input.divider & 256;
     if (overflow && !input.overflow)
     {
         bool changed = false;
