@@ -63,7 +63,7 @@ static const struct {
     { .name = "help", .description = "Display help information", .usage = "help", .length = 1, },
     { .name = "proc", .description = "Display processor information", .usage = "proc", .length = 1, },
     { .name = "rst", .description = "Reset bus", .usage = "rst", .length = 1, },
-    { .name = "run", .description = "Run to breakpoint", .usage = "run [breakpoint]", .length = 2, },
+    { .name = "run", .description = "Run to breakpoint", .usage = "run  [breakpoint]", .length = 2, },
     { .name = "step", .description = "Step to next instruction", .usage = "step [breakpoint]", .length = 2, },
     { .name = "ver", .description = "Display version information", .usage = "ver", .length = 1, },
 };

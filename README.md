@@ -44,18 +44,31 @@ cgbl --fullscreen rom.gbc
 cgbl --scale [1-8] rom.gbc
 ```
 
+## Debugger
+
+|Command          |Description                  |
+|:----------------|:----------------------------|
+|exit             |Exit debug console           |
+|help             |Display help information     |
+|proc             |Display processor information|
+|rst              |Reset bus                    |
+|run  [breakpoint]|Run to breakpoint            |
+|step [breakpoint]|Step to next instruction     |
+|ver              |Display version information  |
+
 ## Keybindings
 
-|Button |Key        |
-|:------|:----------|
-|A      |X          |
-|B      |Z          |
-|Select |C          |
-|Start  |Space      |
-|Right  |Right-Arrow|
-|Left   |Left-Arrow |
-|Up     |Up-Arrow   |
-|Down   |Down-Arrow |
+|Button |Key        |Controller|
+|:------|:----------|:---------|
+|A      |X          |A         |
+|B      |Z          |B         |
+|Select |C          |Back      |
+|Start  |Space      |Start     |
+|Right  |Right-Arrow|Right-Dpad|
+|Left   |Left-Arrow |Left-Dpad |
+|Up     |Up-Arrow   |Up-Dpad   |
+|Down   |Down-Arrow |Down-Dpad |
+|Quit   |Escape     |Guide     |
 
 ## Mappers
 
