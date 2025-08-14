@@ -10,7 +10,7 @@ cgbl_error_e cgbl_buffer_allocate(uint8_t **const buffer, uint32_t length)
 {
     if (!(*buffer = calloc(length, sizeof (**buffer))))
     {
-        return CGBL_ERROR("Failed to allocate buffer: %.02f KB (%u bytes)", length / 1024.f, length);
+        return CGBL_ERROR("Failed to allocate buffer: %u bytes", length);
     }
     return CGBL_SUCCESS;
 }

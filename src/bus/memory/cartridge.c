@@ -150,7 +150,7 @@ static cgbl_error_e cgbl_cartridge_ram_reset(cgbl_bank_t *const bank)
     cgbl_ram_t *ram = (cgbl_ram_t *)bank->data;
     if (bank->length < sizeof (*ram))
     {
-        return CGBL_ERROR("Invalid ram length: %.02f KB (%u bytes)", bank->length / 1024.f, bank->length);
+        return CGBL_ERROR("Invalid ram length: %u bytes", bank->length);
     }
     if ((count = cartridge.rom.data[0x149]) >= CGBL_LENGTH(RAM))
     {
@@ -160,7 +160,7 @@ static cgbl_error_e cgbl_cartridge_ram_reset(cgbl_bank_t *const bank)
     length = (cartridge.ram.count * CGBL_CARTRIDGE_RAM_WIDTH) + sizeof (*ram);
     if (bank->length < length)
     {
-        return CGBL_ERROR("Invalid ram length: %.02f KB (%u bytes)", bank->length / 1024.f, bank->length);
+        return CGBL_ERROR("Invalid ram length: %u bytes", bank->length);
     }
     if (ram->magic == CGBL_CARTRIDGE_RAM_MAGIC)
     {
@@ -171,7 +171,7 @@ static cgbl_error_e cgbl_cartridge_ram_reset(cgbl_bank_t *const bank)
         }
         if (ram->length != (cartridge.ram.count * CGBL_CARTRIDGE_RAM_WIDTH))
         {
-            return CGBL_ERROR("Invalid ram header length: %.02f KB (%u bytes)", ram->length / 1024.f, ram->length);
+            return CGBL_ERROR("Invalid ram header length: %u bytes", ram->length);
         }
     }
     else
@@ -193,7 +193,7 @@ static cgbl_error_e cgbl_cartridge_rom_reset(const cgbl_bank_t *const bank)
     uint8_t checksum = 0, count = 0;
     if (bank->length < CGBL_CARTRIDGE_ROM_WIDTH)
     {
-        return CGBL_ERROR("Invalid rom length: %.02f KB (%u bytes)", bank->length / 1024.f, bank->length);
+        return CGBL_ERROR("Invalid rom length: %u bytes", bank->length);
     }
     for (uint16_t address = 0x134; address < 0x14D; ++address)
     {
@@ -210,7 +210,7 @@ static cgbl_error_e cgbl_cartridge_rom_reset(const cgbl_bank_t *const bank)
     cartridge.rom.count = ROM[count];
     if (bank->length != (cartridge.rom.count * CGBL_CARTRIDGE_ROM_WIDTH))
     {
-        return CGBL_ERROR("Invalid rom length: %.02f KB (%u bytes)", bank->length / 1024.f, bank->length);
+        return CGBL_ERROR("Invalid rom length: %u bytes", bank->length);
     }
     cartridge.rom.data = bank->data;
     return CGBL_SUCCESS;

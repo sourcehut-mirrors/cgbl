@@ -23,40 +23,31 @@ typedef enum {
     CGBL_COMMAND_MAX,
 } cgbl_command_e;
 
-typedef enum {
-    CGBL_MAPPER_0 = 0,
-    CGBL_MAPPER_1,
-    CGBL_MAPPER_2,
-    CGBL_MAPPER_3,
-    CGBL_MAPPER_5,
-    CGBL_MAPPER_MAX,
-} cgbl_mapper_e;
-
 static const struct {
     uint8_t value;
-    cgbl_mapper_e type;
+    const char *name;
 } MAPPER[] = {
-    { 0, CGBL_MAPPER_0 }, { 8, CGBL_MAPPER_0 }, { 9, CGBL_MAPPER_0 },
-    { 1, CGBL_MAPPER_1 }, { 2, CGBL_MAPPER_1 }, { 3, CGBL_MAPPER_1 },
-    { 5, CGBL_MAPPER_2 }, { 6, CGBL_MAPPER_2 },
-    { 15, CGBL_MAPPER_3 }, { 16, CGBL_MAPPER_3 }, { 17, CGBL_MAPPER_3 }, { 18, CGBL_MAPPER_3 },
-    { 19, CGBL_MAPPER_3 },
-    { 25, CGBL_MAPPER_5 }, { 26, CGBL_MAPPER_5 }, { 27, CGBL_MAPPER_5 }, { 28, CGBL_MAPPER_5 },
-    { 29, CGBL_MAPPER_5 }, { 30, CGBL_MAPPER_5 },
+    { 0, "MBC0" }, { 8, "MBC0" }, { 9, "MBC0" },
+    { 1, "MBC1" }, { 2, "MBC1" }, { 3, "MBC1" },
+    { 5, "MBC2" }, { 6, "MBC2" },
+    { 15, "MBC3" }, { 16, "MBC3" }, { 17, "MBC3" }, { 18, "MBC3" },
+    { 19, "MBC3" },
+    { 25, "MBC5" }, { 26, "MBC5" }, { 27, "MBC5" }, { 28, "MBC5" },
+    { 29, "MBC5" }, { 30, "MBC5" },
 };
 
 static const struct {
     uint8_t value;
-    cgbl_mode_e type;
+    const char *name;
 } MODE[] = {
-    { 0x00, CGBL_MODE_DMG }, { 0x80, CGBL_MODE_DMG },
-    { 0xC0, CGBL_MODE_CGB },
+    { 0x00, "DMG" }, { 0x80, "DMG" },
+    { 0xC0, "CGB" },
 };
 
 static const struct {
-    char *name;
-    char *description;
-    char *usage;
+    const char *name;
+    const char *description;
+    const char *usage;
     uint8_t length;
 } OPTION[CGBL_COMMAND_MAX] = {
     { .name = "exit", .description = "Exit debug console", .usage = "exit", .length = 1, },
@@ -245,85 +236,62 @@ static char **cgbl_debug_completion(const char *text, int start, int end)
     return NULL;
 }
 
-static cgbl_error_e cgbl_debug_header_checksum(void)
+static void cgbl_debug_header_checksum(void)
 {
-    uint8_t expected = 0, value = debug.rom->data[0x014D];
-    for (uint32_t index = 0x0134; index <= 0x014C; ++index)
-    {
-        expected = expected - debug.rom->data[index] - 1;
-    }
-    if (expected != value)
-    {
-        return CGBL_ERROR("Mismatched checksum: %02X (expecting %02X)", value, expected);
-    }
+    uint8_t value = debug.rom->data[0x014D];
     fprintf(stdout, "014D | Checksum -- %02X\n", value);
-    return CGBL_SUCCESS;
 }
 
 static void cgbl_debug_header_mapper(void)
 {
-    const char *mapper[CGBL_MAPPER_MAX] = {
-        "MBC0", "MBC1", "MBC2", "MBC3", "MBC5",
-    };
+    const char *name = NULL;
     uint8_t index = 0, value = debug.rom->data[0x0147];
-    cgbl_mapper_e type = 0;
     for (; index < CGBL_LENGTH(MAPPER); ++index)
     {
         if (MAPPER[index].value == value)
         {
-            type = MAPPER[index].type;
+            name = MAPPER[index].name;
             break;
         }
     }
-    fprintf(stdout, "0147 | Mapper   -- %02X (%s)\n", value, (index < CGBL_LENGTH(MAPPER)) ? mapper[type] : "????");
+    fprintf(stdout, "0147 | Mapper   -- %02X (%s)\n", value, name ? name : "????");
 }
 
 static void cgbl_debug_header_mode(void)
 {
-    const char *mode[CGBL_MODE_MAX] = {
-        "DMG", "CGB",
-    };
+    const char *name = NULL;
     uint8_t index = 0, value = debug.rom->data[0x0143];
-    cgbl_mode_e type = 0;
     for (; index < CGBL_LENGTH(MODE); ++index)
     {
         if (MODE[index].value == value)
         {
-            type = MODE[index].type;
+            name = MODE[index].name;
             break;
         }
     }
-    fprintf(stdout, "0143 | Mode     -- %02X (%s)\n", value, (index < CGBL_LENGTH(MODE)) ? mode[type] : "???");
+    fprintf(stdout, "0143 | Mode     -- %02X (%s)\n", value, name ? name : "???");
 }
 
-static cgbl_error_e cgbl_debug_header_ram(void)
+static void cgbl_debug_header_ram(void)
 {
-    uint32_t bank = 0;
     uint8_t value = debug.rom->data[0x0149];
-    if (value >= CGBL_LENGTH(RAM))
+    uint16_t bank = 0;
+    if (value < CGBL_LENGTH(RAM))
     {
-        return CGBL_ERROR("Invalid ram type: %u", value);
+        bank = RAM[value];
     }
-    bank = RAM[value];
-    fprintf(stdout, "0149 | Ram      -- %02X (%u banks, %u bytes)\n", value, bank, bank * 0x2000);
-    return CGBL_SUCCESS;
+    fprintf(stdout, "0149 | Ram      -- %02X (%u banks, %u bytes)\n", value, bank, bank * 0x2000U);
 }
 
-static cgbl_error_e cgbl_debug_header_rom(void)
+static void cgbl_debug_header_rom(void)
 {
-    uint32_t bank = 0;
     uint8_t value = debug.rom->data[0x0148];
-    if (value >= CGBL_LENGTH(ROM))
+    uint16_t bank = 0;
+    if (value < CGBL_LENGTH(ROM))
     {
-        return CGBL_ERROR("Invalid rom type: %u", value);
+        bank = ROM[value];
     }
-    bank = ROM[value];
-    if ((bank * 0x4000) != debug.rom->length)
-    {
-        return CGBL_ERROR("Mismatched rom length: %u bytes (expecting %u bytes)", debug.rom->length, bank * 0x4000);
-    }
-    fprintf(stdout, "0148 | Rom      -- %02X (%u banks, %u bytes)\n", value, bank, bank * 0x4000);
-    return CGBL_SUCCESS;
+    fprintf(stdout, "0148 | Rom      -- %02X (%u banks, %u bytes)\n", value, bank, bank * 0x4000U);
 }
 
 static void cgbl_debug_header_title(void)
@@ -345,9 +313,8 @@ static void cgbl_debug_header_title(void)
     fprintf(stdout, "0134 | Title    -- %s\n", title);
 }
 
-static cgbl_error_e cgbl_debug_header(void)
+static void cgbl_debug_header(void)
 {
-    cgbl_error_e result = CGBL_SUCCESS;
     const cgbl_version_t *const version = cgbl_version();
     fprintf(stdout, "CGBL %u.%u-%x\n", version->major, version->minor, version->patch);
     fprintf(stdout, "Path: %s\n\n", debug.path);
@@ -356,20 +323,10 @@ static cgbl_error_e cgbl_debug_header(void)
         cgbl_debug_header_title();
         cgbl_debug_header_mode();
         cgbl_debug_header_mapper();
-        if ((result = cgbl_debug_header_rom()) != CGBL_SUCCESS)
-        {
-            return result;
-        }
-        if ((result = cgbl_debug_header_ram()) != CGBL_SUCCESS)
-        {
-            return result;
-        }
-        if ((result = cgbl_debug_header_checksum()) != CGBL_SUCCESS)
-        {
-            return result;
-        }
+        cgbl_debug_header_rom();
+        cgbl_debug_header_ram();
+        cgbl_debug_header_checksum();
     }
-    return result;
 }
 
 static const char *cgbl_debug_prompt(void)
@@ -395,10 +352,7 @@ cgbl_error_e cgbl_debug_entry(const char *const path, const cgbl_bank_t *const r
     debug.path = path;
     debug.ram = ram;
     debug.rom = rom;
-    if ((result = cgbl_debug_header()) != CGBL_SUCCESS)
-    {
-        return result;
-    }
+    cgbl_debug_header();
     for (;;)
     {
         char *input = NULL;
