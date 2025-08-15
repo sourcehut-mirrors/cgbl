@@ -317,9 +317,10 @@ static void cgbl_debug_header(void)
 {
     const cgbl_version_t *const version = cgbl_version();
     fprintf(stdout, "CGBL %u.%u-%x\n", version->major, version->minor, version->patch);
-    fprintf(stdout, "Path: %s\n\n", debug.path);
+    fprintf(stdout, "Path: %s\n", debug.path);
     if (debug.rom && debug.rom->data)
     {
+        fprintf(stdout, "\n");
         cgbl_debug_header_title();
         cgbl_debug_header_mode();
         cgbl_debug_header_mapper();

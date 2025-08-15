@@ -864,6 +864,7 @@ uint8_t cgbl_video_read(uint16_t address)
 void cgbl_video_reset(void)
 {
     memset(&video, 0, sizeof (video));
+    memset(&video.pixel.data, 0xFF, sizeof (video.pixel.data));
     cgbl_video_dmg_palette_reset();
     video.ram.bank.raw = 0xFE;
     video.status.raw = 0x80 | CGBL_STATE_SEARCH;
@@ -922,7 +923,8 @@ void cgbl_video_write(uint16_t address, uint8_t data)
             video.control.raw = data;
             if (!video.control.enabled)
             {
-                memset(&video.pixel, 0xFF, sizeof (video.pixel));
+                memset(&video.pixel, 0, sizeof (video.pixel));
+                memset(&video.pixel.data, 0xFF, sizeof (video.pixel.data));
                 video.shown = false;
             }
             break;
