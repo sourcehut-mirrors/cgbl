@@ -13,13 +13,13 @@
 #include "debug.h"
 #include "processor.h"
 
-#define CGBL_TRACE_ERR(_FORMAT_, ...) \
+#define TRACE_ERROR(_FORMAT_, ...) \
     cgbl_debug_trace(CGBL_LEVEL_ERROR, _FORMAT_, ##__VA_ARGS__)
-#define CGBL_TRACE_WARN(_FORMAT_, ...) \
+#define TRACE_WARNING(_FORMAT_, ...) \
     cgbl_debug_trace(CGBL_LEVEL_WARNING, _FORMAT_, ##__VA_ARGS__)
-#define CGBL_TRACE_INFO(_FORMAT_, ...) \
+#define TRACE_INFORMATION(_FORMAT_, ...) \
     cgbl_debug_trace(CGBL_LEVEL_INFORMATION, _FORMAT_, ##__VA_ARGS__)
-#define CGBL_TRACE_VERB(_FORMAT_, ...) \
+#define TRACE_VERBOSE(_FORMAT_, ...) \
     cgbl_debug_trace(CGBL_LEVEL_VERBOSE, _FORMAT_, ##__VA_ARGS__)
 
 typedef enum {
@@ -127,7 +127,7 @@ static inline void cgbl_debug_trace(cgbl_level_e level, const char *const format
 
 static cgbl_error_e cgbl_debug_command_exit(const char **const arguments, uint8_t length)
 {
-    CGBL_TRACE_INFO("Exiting\n");
+    TRACE_INFORMATION("Exiting\n");
     return CGBL_SUCCESS;
 }
 
@@ -141,7 +141,7 @@ static cgbl_error_e cgbl_debug_command_help(const char **const arguments, uint8_
         {
             buffer[offset] = (offset == (sizeof (buffer) - 1)) ? '\0' : ' ';
         }
-        CGBL_TRACE_INFO("%s%s\n", buffer, OPTION[command].description);
+        TRACE_INFORMATION("%s%s\n", buffer, OPTION[command].description);
     }
     return CGBL_SUCCESS;
 }
@@ -163,23 +163,23 @@ static cgbl_error_e cgbl_debug_command_processor(const char **const arguments, u
         switch (reg[index])
         {
             case CGBL_REGISTER_AF:
-                CGBL_TRACE_INFO("AF: %04X (A: %02X, F: %02X) [%c%c%c%c]\n", value.word, value.high, value.low,
+                TRACE_INFORMATION("AF: %04X (A: %02X, F: %02X) [%c%c%c%c]\n", value.word, value.high, value.low,
                     value.carry ? 'C' : '-', value.half_carry ? 'H' : '-', value.negative ? 'N' : '-', value.zero ? 'Z' : '-');
                 break;
             case CGBL_REGISTER_BC:
-                CGBL_TRACE_INFO("BC: %04X (B: %02X, C: %02X)\n", value.word, value.high, value.low);
+                TRACE_INFORMATION("BC: %04X (B: %02X, C: %02X)\n", value.word, value.high, value.low);
                 break;
             case CGBL_REGISTER_DE:
-                CGBL_TRACE_INFO("DE: %04X (D: %02X, E: %02X)\n", value.word, value.high, value.low);
+                TRACE_INFORMATION("DE: %04X (D: %02X, E: %02X)\n", value.word, value.high, value.low);
                 break;
             case CGBL_REGISTER_HL:
-                CGBL_TRACE_INFO("HL: %04X (H: %02X, L: %02X)\n", value.word, value.high, value.low);
+                TRACE_INFORMATION("HL: %04X (H: %02X, L: %02X)\n", value.word, value.high, value.low);
                 break;
             case CGBL_REGISTER_PC:
-                CGBL_TRACE_INFO("PC: %04X\n", value.word);
+                TRACE_INFORMATION("PC: %04X\n", value.word);
                 break;
             case CGBL_REGISTER_SP:
-                CGBL_TRACE_INFO("SP: %04X\n", value.word);
+                TRACE_INFORMATION("SP: %04X\n", value.word);
                 break;
             default:
                 break;
@@ -217,7 +217,7 @@ static cgbl_error_e cgbl_debug_command_run(const char **const arguments, uint8_t
             {
                 if (result == CGBL_BREAKPOINT)
                 {
-                    CGBL_TRACE_WARN("Breakpoint: %04X\n", breakpoint);
+                    TRACE_WARNING("Breakpoint: %04X\n", breakpoint);
                     result = CGBL_SUCCESS;
                 }
                 break;
@@ -252,7 +252,7 @@ static cgbl_error_e cgbl_debug_command_step(const char **const arguments, uint8_
     {
         if (result == CGBL_BREAKPOINT)
         {
-            CGBL_TRACE_WARN("Breakpoint: %04X\n", breakpoint);
+            TRACE_WARNING("Breakpoint: %04X\n", breakpoint);
             result = CGBL_SUCCESS;
         }
         return result;
@@ -267,7 +267,7 @@ static cgbl_error_e cgbl_debug_command_step(const char **const arguments, uint8_
 static cgbl_error_e cgbl_debug_command_version(const char **const arguments, uint8_t length)
 {
     const cgbl_version_t *const version = cgbl_version();
-    CGBL_TRACE_INFO("%u.%u-%x\n", version->major, version->minor, version->patch);
+    TRACE_INFORMATION("%u.%u-%x\n", version->major, version->minor, version->patch);
     return CGBL_SUCCESS;
 }
 
@@ -290,7 +290,7 @@ static char **cgbl_debug_completion(const char *text, int start, int end)
 static void cgbl_debug_header_checksum(void)
 {
     uint8_t value = debug.rom->data[0x014D];
-    CGBL_TRACE_VERB("014D | Checksum -- %02X\n", value);
+    TRACE_VERBOSE("014D | Checksum -- %02X\n", value);
 }
 
 static void cgbl_debug_header_mapper(void)
@@ -305,7 +305,7 @@ static void cgbl_debug_header_mapper(void)
             break;
         }
     }
-    CGBL_TRACE_VERB("0147 | Mapper   -- %02X (%s)\n", value, name ? name : "????");
+    TRACE_VERBOSE("0147 | Mapper   -- %02X (%s)\n", value, name ? name : "????");
 }
 
 static void cgbl_debug_header_mode(void)
@@ -320,7 +320,7 @@ static void cgbl_debug_header_mode(void)
             break;
         }
     }
-    CGBL_TRACE_VERB("0143 | Mode     -- %02X (%s)\n", value, name ? name : "???");
+    TRACE_VERBOSE("0143 | Mode     -- %02X (%s)\n", value, name ? name : "???");
 }
 
 static void cgbl_debug_header_ram(void)
@@ -331,7 +331,7 @@ static void cgbl_debug_header_ram(void)
     {
         bank = RAM[value];
     }
-    CGBL_TRACE_VERB("0149 | Ram      -- %02X (%u banks, %u bytes)\n", value, bank, bank * 0x2000U);
+    TRACE_VERBOSE("0149 | Ram      -- %02X (%u banks, %u bytes)\n", value, bank, bank * 0x2000U);
 }
 
 static void cgbl_debug_header_rom(void)
@@ -342,7 +342,7 @@ static void cgbl_debug_header_rom(void)
     {
         bank = ROM[value];
     }
-    CGBL_TRACE_VERB("0148 | Rom      -- %02X (%u banks, %u bytes)\n", value, bank, bank * 0x4000U);
+    TRACE_VERBOSE("0148 | Rom      -- %02X (%u banks, %u bytes)\n", value, bank, bank * 0x4000U);
 }
 
 static void cgbl_debug_header_title(void)
@@ -361,17 +361,17 @@ static void cgbl_debug_header_title(void)
     {
         strcpy(title, "UNDEFINED");
     }
-    CGBL_TRACE_VERB("0134 | Title    -- %s\n", title);
+    TRACE_VERBOSE("0134 | Title    -- %s\n", title);
 }
 
 static void cgbl_debug_header(void)
 {
     const cgbl_version_t *const version = cgbl_version();
-    CGBL_TRACE_VERB("CGBL %u.%u-%x\n", version->major, version->minor, version->patch);
-    CGBL_TRACE_VERB("Path: %s\n", debug.path);
+    TRACE_VERBOSE("CGBL %u.%u-%x\n", version->major, version->minor, version->patch);
+    TRACE_VERBOSE("Path: %s\n", debug.path);
     if (debug.rom && debug.rom->data)
     {
-        CGBL_TRACE_VERB("\n");
+        TRACE_VERBOSE("\n");
         cgbl_debug_header_title();
         cgbl_debug_header_mode();
         cgbl_debug_header_mapper();
@@ -436,17 +436,17 @@ cgbl_error_e cgbl_debug_entry(const char *const path, const cgbl_bank_t *const r
             }
             if (command >= CGBL_COMMAND_MAX)
             {
-                CGBL_TRACE_ERR("Command unsupported: \'%s\'\n", input);
-                CGBL_TRACE_WARN("Type '%s' for more information\n", OPTION[CGBL_COMMAND_HELP].name);
+                TRACE_ERROR("Command unsupported: \'%s\'\n", input);
+                TRACE_WARNING("Type '%s' for more information\n", OPTION[CGBL_COMMAND_HELP].name);
             }
             else if (length > OPTION[command].length)
             {
-                CGBL_TRACE_ERR("Command usage: %s\n", OPTION[command].usage);
-                CGBL_TRACE_WARN("Type '%s' for more information\n", OPTION[CGBL_COMMAND_HELP].name);
+                TRACE_ERROR("Command usage: %s\n", OPTION[command].usage);
+                TRACE_WARNING("Type '%s' for more information\n", OPTION[CGBL_COMMAND_HELP].name);
             }
             else if ((result = COMMAND[command](arguments, length)) == CGBL_FAILURE)
             {
-                CGBL_TRACE_ERR("Command failed: \'%s\'\n", input);
+                TRACE_ERROR("Command failed: \'%s\'\n", input);
             }
         }
         free(input);
