@@ -33,6 +33,7 @@ static struct {
         float remaining;
     } frame;
     struct {
+        SDL_Cursor *cursor;
         SDL_Renderer *renderer;
         SDL_Texture *texture;
         SDL_Window *window;
@@ -217,11 +218,23 @@ static cgbl_error_e cgbl_client_video_create(uint8_t scale, bool fullscreen)
             return CGBL_ERROR("SDL_ShowCursor failed: %s", SDL_GetError());
         }
     }
+    else
+    {
+        if (!(client.video.cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_CROSSHAIR)))
+        {
+            return CGBL_ERROR("SDL_CreateSystemCursor failed: %s", SDL_GetError());
+        }
+        SDL_SetCursor(client.video.cursor);
+    }
     return CGBL_SUCCESS;
 }
 
 static void cgbl_client_video_destroy(void)
 {
+    if (client.video.cursor)
+    {
+        SDL_FreeCursor(client.video.cursor);
+    }
     if (client.video.texture)
     {
         SDL_DestroyTexture(client.video.texture);
