@@ -36,10 +36,10 @@
 #define CGBL_AUDIO_RAM_WIDTH \
     CGBL_WIDTH(CGBL_AUDIO_RAM_BEGIN, CGBL_AUDIO_RAM_END)
 
+void cgbl_audio_interrupt(void);
 uint8_t cgbl_audio_read(uint16_t address);
 void cgbl_audio_reset(void);
 const float (*cgbl_audio_sample(void))[CGBL_AUDIO_SAMPLES];
-void cgbl_audio_signal(void);
 void cgbl_audio_step(void);
 void cgbl_audio_write(uint16_t address, uint8_t data);
 

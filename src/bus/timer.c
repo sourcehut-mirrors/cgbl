@@ -71,7 +71,7 @@ void cgbl_timer_step(void)
                 overflow = timer.divider & OVERFLOW[timer.control.mode];
                 if (overflow && !timer.overflow.timer && !++timer.counter)
                 {
-                    cgbl_processor_signal(CGBL_INTERRUPT_TIMER);
+                    cgbl_processor_interrupt(CGBL_INTERRUPT_TIMER);
                     timer.counter = timer.modulo;
                 }
                 timer.overflow.timer = overflow;
@@ -79,7 +79,7 @@ void cgbl_timer_step(void)
             overflow = timer.divider & ((cgbl_bus_speed() == CGBL_SPEED_DOUBLE) ? 16384 : 8192);
             if (overflow && !timer.overflow.audio)
             {
-                cgbl_audio_signal();
+                cgbl_audio_interrupt();
             }
             timer.overflow.audio = overflow;
         }

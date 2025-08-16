@@ -2156,7 +2156,7 @@ static cgbl_error_e (*const INSTRUCTION[][CGBL_INSTRUCTION_MAX])(void) = {
     },
 };
 
-static cgbl_error_e cgbl_processor_instruction(void)
+static cgbl_error_e cgbl_processor_execute(void)
 {
     bool prefix = false;
     processor.instruction.address = processor.pc.word;
@@ -2173,7 +2173,7 @@ static cgbl_error_e cgbl_processor_instruction(void)
     return INSTRUCTION[prefix][processor.instruction.opcode]();
 }
 
-static void cgbl_processor_interrupt(void)
+static void cgbl_processor_service(void)
 {
     for (cgbl_interrupt_e interrupt = 0; interrupt < CGBL_INTERRUPT_MAX; ++interrupt)
     {
@@ -2203,6 +2203,12 @@ static void cgbl_processor_interrupt(void)
 bool cgbl_processor_halted(void)
 {
     return processor.halted;
+}
+
+void cgbl_processor_interrupt(cgbl_interrupt_e interrupt)
+{
+    cgbl_processor_write(CGBL_PROCESSOR_INTERRUPT_FLAG,
+        cgbl_processor_read(CGBL_PROCESSOR_INTERRUPT_FLAG) | (1 << interrupt));
 }
 
 cgbl_error_e cgbl_processor_register_read(cgbl_register_e reg, cgbl_register_t *const data)
@@ -2336,12 +2342,6 @@ void cgbl_processor_reset(void)
     processor.interrupt.flag.raw = 0xE0;
 }
 
-void cgbl_processor_signal(cgbl_interrupt_e interrupt)
-{
-    cgbl_processor_write(CGBL_PROCESSOR_INTERRUPT_FLAG,
-        cgbl_processor_read(CGBL_PROCESSOR_INTERRUPT_FLAG) | (1 << interrupt));
-}
-
 cgbl_error_e cgbl_processor_step(uint16_t breakpoint)
 {
     cgbl_error_e result = CGBL_SUCCESS;
@@ -2362,11 +2362,11 @@ cgbl_error_e cgbl_processor_step(uint16_t breakpoint)
                 processor.halted = false;
                 if (processor.interrupt.enabled)
                 {
-                    cgbl_processor_interrupt();
+                    cgbl_processor_service();
                 }
                 else if (!processor.stopped)
                 {
-                    if ((result = cgbl_processor_instruction()) != CGBL_SUCCESS)
+                    if ((result = cgbl_processor_execute()) != CGBL_SUCCESS)
                     {
                         return result;
                     }
@@ -2378,7 +2378,7 @@ cgbl_error_e cgbl_processor_step(uint16_t breakpoint)
             }
             else if (!processor.halted && !processor.stopped)
             {
-                if ((result = cgbl_processor_instruction()) != CGBL_SUCCESS)
+                if ((result = cgbl_processor_execute()) != CGBL_SUCCESS)
                 {
                     return result;
                 }

@@ -538,6 +538,28 @@ static void cgbl_audio_channel_4_trigger(void)
     }
 }
 
+void cgbl_audio_interrupt(void)
+{
+    cgbl_audio_channel_1_length();
+    cgbl_audio_channel_2_length();
+    cgbl_audio_channel_3_length();
+    cgbl_audio_channel_4_length();
+    if (!(audio.cycle % 2))
+    {
+        cgbl_audio_channel_1_sweep();
+    }
+    if (!(audio.cycle % 4))
+    {
+        cgbl_audio_channel_1_envelope();
+        cgbl_audio_channel_2_envelope();
+        cgbl_audio_channel_4_envelope();
+    }
+    if (++audio.cycle >= 4)
+    {
+        audio.cycle = 0;
+    }
+}
+
 uint8_t cgbl_audio_read(uint16_t address)
 {
     uint8_t result = 0xFF;
@@ -624,28 +646,6 @@ void cgbl_audio_reset(void)
 const float (*cgbl_audio_sample(void))[CGBL_AUDIO_SAMPLES]
 {
     return &audio.sample;
-}
-
-void cgbl_audio_signal(void)
-{
-    cgbl_audio_channel_1_length();
-    cgbl_audio_channel_2_length();
-    cgbl_audio_channel_3_length();
-    cgbl_audio_channel_4_length();
-    if (!(audio.cycle % 2))
-    {
-        cgbl_audio_channel_1_sweep();
-    }
-    if (!(audio.cycle % 4))
-    {
-        cgbl_audio_channel_1_envelope();
-        cgbl_audio_channel_2_envelope();
-        cgbl_audio_channel_4_envelope();
-    }
-    if (++audio.cycle >= 4)
-    {
-        audio.cycle = 0;
-    }
 }
 
 void cgbl_audio_step(void)

@@ -65,7 +65,7 @@ void cgbl_input_step(void)
         }
         if (changed)
         {
-            cgbl_processor_signal(CGBL_INTERRUPT_INPUT);
+            cgbl_processor_interrupt(CGBL_INTERRUPT_INPUT);
         }
     }
     input.overflow = overflow;

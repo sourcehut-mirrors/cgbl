@@ -54,7 +54,7 @@ void cgbl_serial_step(void)
             bool overflow = ++serial.divider & (serial.control.speed ? 64 : 2048);
             if (overflow && !serial.overflow)
             {
-                cgbl_processor_signal(CGBL_INTERRUPT_SERIAL);
+                cgbl_processor_interrupt(CGBL_INTERRUPT_SERIAL);
                 serial.control.enabled = false;
                 serial.data = 0xFF;
                 serial.divider = 0;

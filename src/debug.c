@@ -6,7 +6,6 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "client.h"
@@ -24,8 +23,14 @@
 
 typedef enum {
     CGBL_COMMAND_EXIT = 0,
+    CGBL_COMMAND_DISASSEMBLE,
     CGBL_COMMAND_HELP,
+    CGBL_COMMAND_INTERRUPT,
+    CGBL_COMMAND_MEMORY_READ,
+    CGBL_COMMAND_MEMORY_WRITE,
     CGBL_COMMAND_PROCESSOR,
+    CGBL_COMMAND_REGISTER_READ,
+    CGBL_COMMAND_REGISTER_WRITE,
     CGBL_COMMAND_RESET,
     CGBL_COMMAND_RUN,
     CGBL_COMMAND_STEP,
@@ -42,59 +47,49 @@ typedef enum {
     CGBL_LEVEL_MAX,
 } cgbl_level_e;
 
-static const struct {
-    uint8_t value;
-    const char *name;
-} MAPPER[] = {
-    { 0, "MBC0" }, { 8, "MBC0" }, { 9, "MBC0" },
-    { 1, "MBC1" }, { 2, "MBC1" }, { 3, "MBC1" },
-    { 5, "MBC2" }, { 6, "MBC2" },
-    { 15, "MBC3" }, { 16, "MBC3" }, { 17, "MBC3" }, { 18, "MBC3" },
-    { 19, "MBC3" },
-    { 25, "MBC5" }, { 26, "MBC5" }, { 27, "MBC5" }, { 28, "MBC5" },
-    { 29, "MBC5" }, { 30, "MBC5" },
-};
-
-static const struct {
-    uint8_t value;
-    const char *name;
-} MODE[] = {
-    { 0x00, "DMG" }, { 0x80, "DMG" },
-    { 0xC0, "CGB" },
+static const char *INTERRUPT[CGBL_INTERRUPT_MAX] = {
+    "vblk", "lcdc", "tmr", "ser",
+    "joy",
 };
 
 static const struct {
     const char *name;
     const char *description;
     const char *usage;
-    uint8_t length;
+    uint8_t min;
+    uint8_t max;
 } OPTION[CGBL_COMMAND_MAX] = {
-    { .name = "exit", .description = "Exit debug console", .usage = "exit", .length = 1, },
-    { .name = "help", .description = "Display help information", .usage = "help", .length = 1, },
-    { .name = "proc", .description = "Display processor information", .usage = "proc", .length = 1, },
-    { .name = "rst", .description = "Reset bus", .usage = "rst", .length = 1, },
-    { .name = "run", .description = "Run to breakpoint", .usage = "run [breakpoint]", .length = 2, },
-    { .name = "step", .description = "Step to next instruction", .usage = "step [breakpoint]", .length = 2, },
-    { .name = "ver", .description = "Display version information", .usage = "ver", .length = 1, },
+    { .name = "exit", .description = "Exit debug console", .usage = "exit", .min = 1, .max = 1, },
+    { .name = "dasm", .description = "Disassemble instructions", .usage = "dasm addr [len]", .min = 2, .max = 3, },
+    { .name = "help", .description = "Display help information", .usage = "help", .min = 1, .max = 1, },
+    { .name = "itr", .description = "Interrupt bus", .usage = "itr val", .min = 2, .max = 2, },
+    { .name = "memr", .description = "Read value from memory", .usage = "memr addr [len]", .min = 2, .max = 3, },
+    { .name = "memw", .description = "Write value to memory", .usage = "memw addr val [len]", .min = 3, .max = 4, },
+    { .name = "proc", .description = "Display processor information", .usage = "proc", .min = 1, .max = 1, },
+    { .name = "regr", .description = "Read value from register", .usage = "regr reg", .min = 2, .max = 2, },
+    { .name = "regw", .description = "Write value to register", .usage = "regw reg val", .min = 3, .max = 3, },
+    { .name = "rst", .description = "Reset bus", .usage = "rst", .min = 1, .max = 1, },
+    { .name = "run", .description = "Run to breakpoint", .usage = "run [bp]", .min = 1, .max = 2, },
+    { .name = "step", .description = "Step to next instruction", .usage = "step [bp]", .min = 1, .max = 2, },
+    { .name = "ver", .description = "Display version information", .usage = "ver", .min = 1, .max = 1, },
 };
 
-static const uint16_t RAM[] = {
-    1, 1, 1, 4, 16, 8,
-};
-
-static const uint16_t ROM[] = {
-    2, 4, 8, 16, 32, 64, 128, 256, 512,
+static const char *REGISTER[CGBL_REGISTER_MAX] = {
+    "a", "af", "b", "bc",
+    "c", "d", "de", "e",
+    "f", "h", "hl", "l",
+    "pc", "sp",
 };
 
 static const struct {
     const char *begin;
     const char *end;
 } TRACE[CGBL_LEVEL_MAX] = {
-    { "\033[31m", "\033[m", },
-    { "\033[93m", "\033[m", },
-    { "\033[0m", "\033[m", },
-    { "\033[37m", "\033[m", },
-    { "\033[32m", "\033[m", },
+    { "\x1B[31m", "\x1B[m", },
+    { "\x1B[93m", "\x1B[m", },
+    { "\x1B[0m", "\x1B[m", },
+    { "\x1B[37m", "\x1B[m", },
+    { "\x1B[32m", "\x1B[m", },
 };
 
 static struct {
@@ -103,6 +98,66 @@ static struct {
     cgbl_bank_t *ram;
     const cgbl_bank_t *rom;
 } debug = {};
+
+static inline void cgbl_debug_disassemble(uint16_t address, uint16_t length)
+{
+    if (length > 1)
+    {
+        /* TODO */
+    }
+    else
+    {
+        /* TODO */
+    }
+}
+
+static inline cgbl_interrupt_e cgbl_debug_interrupt(const char *const name)
+{
+    cgbl_interrupt_e result = 0;
+    for (; result < CGBL_INTERRUPT_MAX; ++result)
+    {
+        if (!strcmp(name, INTERRUPT[result]))
+        {
+            break;
+        }
+    }
+    return result;
+}
+
+static inline void cgbl_debug_memory(uint16_t address, uint16_t length)
+{
+    if (length > 1)
+    {
+        /* TODO */
+    }
+    else
+    {
+        /* TODO */
+    }
+}
+
+static inline cgbl_register_e cgbl_debug_register(const char *const name)
+{
+    cgbl_register_e result = 0;
+    for (; result < CGBL_REGISTER_MAX; ++result)
+    {
+        if (!strcmp(name, REGISTER[result]))
+        {
+            break;
+        }
+    }
+    return result;
+}
+
+static inline cgbl_error_e cgbl_debug_register_value(const char *const name, cgbl_register_t *const value)
+{
+    cgbl_register_e reg = cgbl_debug_register(name);
+    if (reg < CGBL_REGISTER_MAX)
+    {
+        return cgbl_processor_register_read(reg, value);
+    }
+    return CGBL_FAILURE;
+}
 
 static inline void cgbl_debug_trace(cgbl_level_e level, const char *const format, ...)
 {
@@ -131,6 +186,13 @@ static cgbl_error_e cgbl_debug_command_exit(const char **const arguments, uint8_
     return CGBL_SUCCESS;
 }
 
+static cgbl_error_e cgbl_debug_command_disassemble(const char **const arguments, uint8_t length)
+{
+    /* TODO */
+    return CGBL_SUCCESS;
+    /* ---- */
+}
+
 static cgbl_error_e cgbl_debug_command_help(const char **const arguments, uint8_t length)
 {
     for (cgbl_command_e command = 0; command < CGBL_COMMAND_MAX; ++command)
@@ -144,6 +206,27 @@ static cgbl_error_e cgbl_debug_command_help(const char **const arguments, uint8_
         TRACE_INFORMATION("%s%s\n", buffer, OPTION[command].description);
     }
     return CGBL_SUCCESS;
+}
+
+static cgbl_error_e cgbl_debug_command_interrupt(const char **const arguments, uint8_t length)
+{
+    /* TODO */
+    return CGBL_SUCCESS;
+    /* ---- */
+}
+
+static cgbl_error_e cgbl_debug_command_memory_read(const char **const arguments, uint8_t length)
+{
+    /* TODO */
+    return CGBL_SUCCESS;
+    /* ---- */
+}
+
+static cgbl_error_e cgbl_debug_command_memory_write(const char **const arguments, uint8_t length)
+{
+    /* TODO */
+    return CGBL_SUCCESS;
+    /* ---- */
 }
 
 static cgbl_error_e cgbl_debug_command_processor(const char **const arguments, uint8_t length)
@@ -188,6 +271,20 @@ static cgbl_error_e cgbl_debug_command_processor(const char **const arguments, u
     return result;
 }
 
+static cgbl_error_e cgbl_debug_command_register_read(const char **const arguments, uint8_t length)
+{
+    /* TODO */
+    return CGBL_SUCCESS;
+    /* ---- */
+}
+
+static cgbl_error_e cgbl_debug_command_register_write(const char **const arguments, uint8_t length)
+{
+    /* TODO */
+    return CGBL_SUCCESS;
+    /* ---- */
+}
+
 static cgbl_error_e cgbl_debug_command_reset(const char **const arguments, uint8_t length)
 {
     return cgbl_bus_reset(debug.rom, debug.ram);
@@ -197,7 +294,7 @@ static cgbl_error_e cgbl_debug_command_run(const char **const arguments, uint8_t
 {
     uint16_t breakpoint = 0xFFFF;
     cgbl_error_e result = CGBL_SUCCESS;
-    if (length == OPTION[CGBL_COMMAND_RUN].length)
+    if (length == OPTION[CGBL_COMMAND_RUN].max)
     {
         breakpoint = strtol(arguments[1], NULL, 16);
     }
@@ -235,11 +332,15 @@ static cgbl_error_e cgbl_debug_command_step(const char **const arguments, uint8_
 {
     uint16_t breakpoint = 0xFFFF;
     cgbl_error_e result = CGBL_SUCCESS;
-    if (length == OPTION[CGBL_COMMAND_STEP].length)
+    cgbl_register_t reg = {};
+    if (length == OPTION[CGBL_COMMAND_STEP].max)
     {
         breakpoint = strtol(arguments[1], NULL, 16);
     }
-    /* TODO: DISASSEMBLE INSTRUCTION */
+    if (cgbl_processor_register_read(CGBL_REGISTER_PC, &reg) == CGBL_SUCCESS)
+    {
+        cgbl_debug_disassemble(reg.word, 1);
+    }
     if ((result = cgbl_client_poll()) != CGBL_SUCCESS)
     {
         if (result == CGBL_QUIT)
@@ -273,8 +374,14 @@ static cgbl_error_e cgbl_debug_command_version(const char **const arguments, uin
 
 static cgbl_error_e (*const COMMAND[CGBL_COMMAND_MAX])(const char **const arguments, uint8_t length) = {
     cgbl_debug_command_exit,
+    cgbl_debug_command_disassemble,
     cgbl_debug_command_help,
+    cgbl_debug_command_interrupt,
+    cgbl_debug_command_memory_read,
+    cgbl_debug_command_memory_write,
     cgbl_debug_command_processor,
+    cgbl_debug_command_register_read,
+    cgbl_debug_command_register_write,
     cgbl_debug_command_reset,
     cgbl_debug_command_run,
     cgbl_debug_command_step,
@@ -287,98 +394,11 @@ static char **cgbl_debug_completion(const char *text, int start, int end)
     return NULL;
 }
 
-static void cgbl_debug_header_checksum(void)
-{
-    uint8_t value = debug.rom->data[0x014D];
-    TRACE_VERBOSE("014D | Checksum -- %02X\n", value);
-}
-
-static void cgbl_debug_header_mapper(void)
-{
-    const char *name = NULL;
-    uint8_t index = 0, value = debug.rom->data[0x0147];
-    for (; index < CGBL_LENGTH(MAPPER); ++index)
-    {
-        if (MAPPER[index].value == value)
-        {
-            name = MAPPER[index].name;
-            break;
-        }
-    }
-    TRACE_VERBOSE("0147 | Mapper   -- %02X (%s)\n", value, name ? name : "????");
-}
-
-static void cgbl_debug_header_mode(void)
-{
-    const char *name = NULL;
-    uint8_t index = 0, value = debug.rom->data[0x0143];
-    for (; index < CGBL_LENGTH(MODE); ++index)
-    {
-        if (MODE[index].value == value)
-        {
-            name = MODE[index].name;
-            break;
-        }
-    }
-    TRACE_VERBOSE("0143 | Mode     -- %02X (%s)\n", value, name ? name : "???");
-}
-
-static void cgbl_debug_header_ram(void)
-{
-    uint8_t value = debug.rom->data[0x0149];
-    uint16_t bank = 0;
-    if (value < CGBL_LENGTH(RAM))
-    {
-        bank = RAM[value];
-    }
-    TRACE_VERBOSE("0149 | Ram      -- %02X (%u banks, %u bytes)\n", value, bank, bank * 0x2000U);
-}
-
-static void cgbl_debug_header_rom(void)
-{
-    uint8_t value = debug.rom->data[0x0148];
-    uint16_t bank = 0;
-    if (value < CGBL_LENGTH(ROM))
-    {
-        bank = ROM[value];
-    }
-    TRACE_VERBOSE("0148 | Rom      -- %02X (%u banks, %u bytes)\n", value, bank, bank * 0x4000U);
-}
-
-static void cgbl_debug_header_title(void)
-{
-    char title[12] = {};
-    for (uint32_t index = 0; index < (sizeof (title) - 1); ++index)
-    {
-        char value = debug.rom->data[0x0134 + index];
-        if (!value)
-        {
-            break;
-        }
-        title[index] = value;
-    }
-    if (!strlen(title))
-    {
-        strcpy(title, "UNDEFINED");
-    }
-    TRACE_VERBOSE("0134 | Title    -- %s\n", title);
-}
-
 static void cgbl_debug_header(void)
 {
     const cgbl_version_t *const version = cgbl_version();
     TRACE_VERBOSE("CGBL %u.%u-%x\n", version->major, version->minor, version->patch);
-    TRACE_VERBOSE("Path: %s\n", debug.path);
-    if (debug.rom && debug.rom->data)
-    {
-        TRACE_VERBOSE("\n");
-        cgbl_debug_header_title();
-        cgbl_debug_header_mode();
-        cgbl_debug_header_mapper();
-        cgbl_debug_header_rom();
-        cgbl_debug_header_ram();
-        cgbl_debug_header_checksum();
-    }
+    TRACE_VERBOSE("Path: %s\n", (debug.path && strlen(debug.path)) ? debug.path : "Undefined");
 }
 
 static const char *cgbl_debug_prompt(void)
@@ -401,7 +421,6 @@ static const char *cgbl_debug_prompt(void)
 cgbl_error_e cgbl_debug_entry(const char *const path, const cgbl_bank_t *const rom, cgbl_bank_t *const ram)
 {
     cgbl_error_e result = CGBL_SUCCESS;
-    rl_attempted_completion_function = cgbl_debug_completion;
     memset(&debug, 0, sizeof (debug));
     debug.path = path;
     debug.ram = ram;
@@ -411,16 +430,17 @@ cgbl_error_e cgbl_debug_entry(const char *const path, const cgbl_bank_t *const r
     {
         char *input = NULL;
         cgbl_command_e command = CGBL_COMMAND_MAX;
+        rl_attempted_completion_function = cgbl_debug_completion;
         if ((input = readline(cgbl_debug_prompt())) && strlen(input))
         {
             uint8_t length = 0;
             char *argument = NULL;
-            const char *arguments[4] = {};
+            const char *arguments[5] = {};
             add_history(input);
             argument = strtok(input, " ");
             while (argument)
             {
-                if (length >= 4)
+                if (length >= CGBL_LENGTH(arguments))
                 {
                     break;
                 }
@@ -439,7 +459,7 @@ cgbl_error_e cgbl_debug_entry(const char *const path, const cgbl_bank_t *const r
                 TRACE_ERROR("Command unsupported: \'%s\'\n", input);
                 TRACE_WARNING("Type '%s' for more information\n", OPTION[CGBL_COMMAND_HELP].name);
             }
-            else if (length > OPTION[command].length)
+            else if ((length < OPTION[command].min) || (length > OPTION[command].max))
             {
                 TRACE_ERROR("Command usage: %s\n", OPTION[command].usage);
                 TRACE_WARNING("Type '%s' for more information\n", OPTION[CGBL_COMMAND_HELP].name);

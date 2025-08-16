@@ -622,7 +622,7 @@ static void cgbl_video_coincidence(void)
         bool coincidence = (!video.line.coincidence && (video.line.y == 153)) || (video.line.coincidence == video.line.y);
         if (coincidence && !video.status.coincidence && video.status.interrupt_coincidence)
         {
-            cgbl_processor_signal(CGBL_INTERRUPT_SCREEN);
+            cgbl_processor_interrupt(CGBL_INTERRUPT_SCREEN);
         }
         video.status.coincidence = coincidence;
     }
@@ -688,7 +688,7 @@ static void cgbl_video_hblank(void)
         }
         if (video.status.interrupt_hblank)
         {
-            cgbl_processor_signal(CGBL_INTERRUPT_SCREEN);
+            cgbl_processor_interrupt(CGBL_INTERRUPT_SCREEN);
         }
     }
 }
@@ -711,7 +711,7 @@ static void cgbl_video_search(void)
         }
         if (video.status.interrupt_search)
         {
-            cgbl_processor_signal(CGBL_INTERRUPT_SCREEN);
+            cgbl_processor_interrupt(CGBL_INTERRUPT_SCREEN);
         }
     }
 }
@@ -751,9 +751,9 @@ static void cgbl_video_vblank(void)
     {
         if (video.status.interrupt_vblank)
         {
-            cgbl_processor_signal(CGBL_INTERRUPT_SCREEN);
+            cgbl_processor_interrupt(CGBL_INTERRUPT_SCREEN);
         }
-        cgbl_processor_signal(CGBL_INTERRUPT_VBLANK);
+        cgbl_processor_interrupt(CGBL_INTERRUPT_VBLANK);
     }
 }
 
