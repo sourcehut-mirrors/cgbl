@@ -62,12 +62,12 @@ static const struct {
     { .name = "exit", .description = "Exit debug console", .usage = "exit", .min = 1, .max = 1, },
     { .name = "dasm", .description = "Disassemble instructions", .usage = "dasm addr [len]", .min = 2, .max = 3, },
     { .name = "help", .description = "Display help information", .usage = "help", .min = 1, .max = 1, },
-    { .name = "itr", .description = "Interrupt bus", .usage = "itr val", .min = 2, .max = 2, },
-    { .name = "memr", .description = "Read value from memory", .usage = "memr addr [len]", .min = 2, .max = 3, },
-    { .name = "memw", .description = "Write value to memory", .usage = "memw addr val [len]", .min = 3, .max = 4, },
+    { .name = "itr", .description = "Interrupt bus", .usage = "itr int", .min = 2, .max = 2, },
+    { .name = "memr", .description = "Read data from memory", .usage = "memr addr [len]", .min = 2, .max = 3, },
+    { .name = "memw", .description = "Write data to memory", .usage = "memw addr data [len]", .min = 3, .max = 4, },
     { .name = "proc", .description = "Display processor information", .usage = "proc", .min = 1, .max = 1, },
-    { .name = "regr", .description = "Read value from register", .usage = "regr reg", .min = 2, .max = 2, },
-    { .name = "regw", .description = "Write value to register", .usage = "regw reg val", .min = 3, .max = 3, },
+    { .name = "regr", .description = "Read data from register", .usage = "regr reg", .min = 2, .max = 2, },
+    { .name = "regw", .description = "Write data to register", .usage = "regw reg data", .min = 3, .max = 3, },
     { .name = "rst", .description = "Reset bus", .usage = "rst", .min = 1, .max = 1, },
     { .name = "run", .description = "Run to breakpoint", .usage = "run [bp]", .min = 1, .max = 2, },
     { .name = "step", .description = "Step to next instruction", .usage = "step [bp]", .min = 1, .max = 2, },
@@ -99,6 +99,27 @@ static struct {
     const cgbl_bank_t *rom;
 } debug = {};
 
+static inline void cgbl_debug_trace(cgbl_level_e level, const char *const format, ...)
+{
+    char buffer[128] = {};
+    FILE *stream = NULL;
+    va_list arguments;
+    va_start(arguments, format);
+    vsnprintf(buffer, sizeof (buffer), format, arguments);
+    va_end(arguments);
+    switch (level)
+    {
+        case CGBL_LEVEL_ERROR:
+        case CGBL_LEVEL_WARNING:
+            stream = stderr;
+            break;
+        default:
+            stream = stdout;
+            break;
+    }
+    fprintf(stream, "%s%s%s", TRACE[level].begin, buffer, TRACE[level].end);
+}
+
 static inline void cgbl_debug_disassemble(uint16_t address, uint16_t length)
 {
     if (length > 1)
@@ -124,18 +145,6 @@ static inline cgbl_interrupt_e cgbl_debug_interrupt(const char *const name)
     return result;
 }
 
-static inline void cgbl_debug_memory(uint16_t address, uint16_t length)
-{
-    if (length > 1)
-    {
-        /* TODO */
-    }
-    else
-    {
-        /* TODO */
-    }
-}
-
 static inline cgbl_register_e cgbl_debug_register(const char *const name)
 {
     cgbl_register_e result = 0;
@@ -149,35 +158,14 @@ static inline cgbl_register_e cgbl_debug_register(const char *const name)
     return result;
 }
 
-static inline cgbl_error_e cgbl_debug_register_value(const char *const name, cgbl_register_t *const value)
+static inline cgbl_error_e cgbl_debug_register_data(const char *const name, cgbl_register_t *const data)
 {
     cgbl_register_e reg = cgbl_debug_register(name);
     if (reg < CGBL_REGISTER_MAX)
     {
-        return cgbl_processor_register_read(reg, value);
+        return cgbl_processor_register_read(reg, data);
     }
     return CGBL_FAILURE;
-}
-
-static inline void cgbl_debug_trace(cgbl_level_e level, const char *const format, ...)
-{
-    char buffer[128] = {};
-    FILE *stream = NULL;
-    va_list arguments;
-    va_start(arguments, format);
-    vsnprintf(buffer, sizeof (buffer), format, arguments);
-    va_end(arguments);
-    switch (level)
-    {
-        case CGBL_LEVEL_ERROR:
-        case CGBL_LEVEL_WARNING:
-            stream = stderr;
-            break;
-        default:
-            stream = stdout;
-            break;
-    }
-    fprintf(stream, "%s%s%s", TRACE[level].begin, buffer, TRACE[level].end);
 }
 
 static cgbl_error_e cgbl_debug_command_exit(const char **const arguments, uint8_t length)
@@ -188,9 +176,22 @@ static cgbl_error_e cgbl_debug_command_exit(const char **const arguments, uint8_
 
 static cgbl_error_e cgbl_debug_command_disassemble(const char **const arguments, uint8_t length)
 {
-    /* TODO */
+    uint16_t address = 0, offset = 1;
+    cgbl_register_t data = {};
+    if (cgbl_debug_register_data(arguments[1], &data) == CGBL_SUCCESS)
+    {
+        address = data.word;
+    }
+    else
+    {
+        address = strtol(arguments[1], NULL, 16);
+    }
+    if (length == OPTION[CGBL_COMMAND_DISASSEMBLE].max)
+    {
+        offset = strtol(arguments[length - 1], NULL, 16);
+    }
+    cgbl_debug_disassemble(address, offset);
     return CGBL_SUCCESS;
-    /* ---- */
 }
 
 static cgbl_error_e cgbl_debug_command_help(const char **const arguments, uint8_t length)
@@ -210,23 +211,64 @@ static cgbl_error_e cgbl_debug_command_help(const char **const arguments, uint8_
 
 static cgbl_error_e cgbl_debug_command_interrupt(const char **const arguments, uint8_t length)
 {
-    /* TODO */
+    cgbl_interrupt_e interrupt = cgbl_debug_interrupt(arguments[1]);
+    if (interrupt >= CGBL_INTERRUPT_MAX)
+    {
+        return CGBL_FAILURE;
+    }
+    cgbl_processor_interrupt(interrupt);
     return CGBL_SUCCESS;
-    /* ---- */
 }
 
 static cgbl_error_e cgbl_debug_command_memory_read(const char **const arguments, uint8_t length)
 {
-    /* TODO */
+    uint16_t address = 0, offset = 1;
+    cgbl_register_t data = {};
+    if (cgbl_debug_register_data(arguments[1], &data) == CGBL_SUCCESS)
+    {
+        address = data.word;
+    }
+    else
+    {
+        address = strtol(arguments[1], NULL, 16);
+    }
+    if (length == OPTION[CGBL_COMMAND_MEMORY_READ].max)
+    {
+        offset = strtol(arguments[length - 1], NULL, 16);
+    }
+    if (offset > 1)
+    {
+        /* TODO */
+    }
+    else
+    {
+        TRACE_INFORMATION("%02X\n", cgbl_bus_read(address));
+    }
     return CGBL_SUCCESS;
-    /* ---- */
 }
 
 static cgbl_error_e cgbl_debug_command_memory_write(const char **const arguments, uint8_t length)
 {
-    /* TODO */
+    uint16_t address = 0, offset = 1;
+    cgbl_register_t data = {};
+    if (cgbl_debug_register_data(arguments[1], &data) == CGBL_SUCCESS)
+    {
+        address = data.word;
+    }
+    else
+    {
+        address = strtol(arguments[1], NULL, 16);
+    }
+    data.low = strtol(arguments[2], NULL, 16);
+    if (length == OPTION[CGBL_COMMAND_MEMORY_WRITE].max)
+    {
+        offset = strtol(arguments[length - 1], NULL, 16);
+    }
+    for (uint32_t index = address; index < address + offset; ++index)
+    {
+        cgbl_bus_write(index, data.low);
+    }
     return CGBL_SUCCESS;
-    /* ---- */
 }
 
 static cgbl_error_e cgbl_debug_command_processor(const char **const arguments, uint8_t length)
@@ -238,31 +280,31 @@ static cgbl_error_e cgbl_debug_command_processor(const char **const arguments, u
     cgbl_error_e result = CGBL_SUCCESS;
     for (uint32_t index = 0; index < CGBL_LENGTH(reg); ++index)
     {
-        cgbl_register_t value = {};
-        if ((result = cgbl_processor_register_read(reg[index], &value)) != CGBL_SUCCESS)
+        cgbl_register_t data = {};
+        if ((result = cgbl_processor_register_read(reg[index], &data)) != CGBL_SUCCESS)
         {
             break;
         }
         switch (reg[index])
         {
             case CGBL_REGISTER_AF:
-                TRACE_INFORMATION("AF: %04X (A: %02X, F: %02X) [%c%c%c%c]\n", value.word, value.high, value.low,
-                    value.carry ? 'C' : '-', value.half_carry ? 'H' : '-', value.negative ? 'N' : '-', value.zero ? 'Z' : '-');
+                TRACE_INFORMATION("AF: %04X (A: %02X, F: %02X) [%c%c%c%c]\n", data.word, data.high, data.low,
+                    data.carry ? 'C' : '-', data.half_carry ? 'H' : '-', data.negative ? 'N' : '-', data.zero ? 'Z' : '-');
                 break;
             case CGBL_REGISTER_BC:
-                TRACE_INFORMATION("BC: %04X (B: %02X, C: %02X)\n", value.word, value.high, value.low);
+                TRACE_INFORMATION("BC: %04X (B: %02X, C: %02X)\n", data.word, data.high, data.low);
                 break;
             case CGBL_REGISTER_DE:
-                TRACE_INFORMATION("DE: %04X (D: %02X, E: %02X)\n", value.word, value.high, value.low);
+                TRACE_INFORMATION("DE: %04X (D: %02X, E: %02X)\n", data.word, data.high, data.low);
                 break;
             case CGBL_REGISTER_HL:
-                TRACE_INFORMATION("HL: %04X (H: %02X, L: %02X)\n", value.word, value.high, value.low);
+                TRACE_INFORMATION("HL: %04X (H: %02X, L: %02X)\n", data.word, data.high, data.low);
                 break;
             case CGBL_REGISTER_PC:
-                TRACE_INFORMATION("PC: %04X\n", value.word);
+                TRACE_INFORMATION("PC: %04X\n", data.word);
                 break;
             case CGBL_REGISTER_SP:
-                TRACE_INFORMATION("SP: %04X\n", value.word);
+                TRACE_INFORMATION("SP: %04X\n", data.word);
                 break;
             default:
                 break;
@@ -273,16 +315,41 @@ static cgbl_error_e cgbl_debug_command_processor(const char **const arguments, u
 
 static cgbl_error_e cgbl_debug_command_register_read(const char **const arguments, uint8_t length)
 {
-    /* TODO */
-    return CGBL_SUCCESS;
-    /* ---- */
+    cgbl_error_e result =CGBL_SUCCESS;
+    cgbl_register_e reg = cgbl_debug_register(arguments[1]);
+    cgbl_register_t data = {};
+    if ((result = cgbl_processor_register_read(reg, &data)) == CGBL_SUCCESS)
+    {
+        switch (reg)
+        {
+            case CGBL_REGISTER_AF:
+                TRACE_INFORMATION("%04X [%c%c%c%c]\n", data.word,
+                    data.carry ? 'C' : '-', data.half_carry ? 'H' : '-', data.negative ? 'N' : '-', data.zero ? 'Z' : '-');
+                break;
+            case CGBL_REGISTER_BC:
+            case CGBL_REGISTER_DE:
+            case CGBL_REGISTER_HL:
+            case CGBL_REGISTER_PC:
+            case CGBL_REGISTER_SP:
+                TRACE_INFORMATION("%04X\n", data.word);
+                break;
+            case CGBL_REGISTER_F:
+                TRACE_INFORMATION("%02X [%c%c%c%c]\n", data.low,
+                    data.carry ? 'C' : '-', data.half_carry ? 'H' : '-', data.negative ? 'N' : '-', data.zero ? 'Z' : '-');
+                break;
+            default:
+                TRACE_INFORMATION("%02X\n", data.low);
+                break;
+        }
+    }
+    return result;
 }
 
 static cgbl_error_e cgbl_debug_command_register_write(const char **const arguments, uint8_t length)
 {
-    /* TODO */
-    return CGBL_SUCCESS;
-    /* ---- */
+    cgbl_register_e reg = cgbl_debug_register(arguments[1]);
+    cgbl_register_t data = { .word = strtol(arguments[2], NULL, 16) };
+    return cgbl_processor_register_write(reg, &data);
 }
 
 static cgbl_error_e cgbl_debug_command_reset(const char **const arguments, uint8_t length)

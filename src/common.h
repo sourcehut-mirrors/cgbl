@@ -10,7 +10,7 @@
 
 #define CGBL_VERSION_MAJOR 0
 #define CGBL_VERSION_MINOR 2
-#define CGBL_VERSION_PATCH 0x74f7f9a
+#define CGBL_VERSION_PATCH 0x61a69ef
 
 #define CGBL_ERROR(_FORMAT_, ...) \
     cgbl_error_set(__FILE__, __LINE__, _FORMAT_, ##__VA_ARGS__)

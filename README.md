@@ -51,12 +51,12 @@ cgbl --scale [1-8] rom.gbc
 |exit           |Exit debug console           |
 |dasm addr [len]|Disassemble instructions     |
 |help           |Display help information     |
-|itr val        |Interrupt bus                |
-|memr addr      |Read value from memory       |
-|memw addr val  |Write value to memory        |
+|itr int        |Interrupt bus                |
+|memr addr      |Read data from memory       |
+|memw addr data |Write data to memory        |
 |proc           |Display processor information|
-|regr reg       |Read value from register     |
-|regw reg val   |Write value to register      |
+|regr reg       |Read data from register     |
+|regw reg data  |Write data to register      |
 |rst            |Reset bus                    |
 |run [bp]       |Run to breakpoint            |
 |step [bp]      |Step to next instruction     |
