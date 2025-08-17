@@ -18,8 +18,6 @@
     cgbl_debug_trace(CGBL_LEVEL_WARNING, _FORMAT_, ##__VA_ARGS__)
 #define TRACE_INFORMATION(_FORMAT_, ...) \
     cgbl_debug_trace(CGBL_LEVEL_INFORMATION, _FORMAT_, ##__VA_ARGS__)
-#define TRACE_VERBOSE(_FORMAT_, ...) \
-    cgbl_debug_trace(CGBL_LEVEL_VERBOSE, _FORMAT_, ##__VA_ARGS__)
 
 typedef enum {
     CGBL_COMMAND_EXIT = 0,
@@ -42,10 +40,158 @@ typedef enum {
     CGBL_LEVEL_ERROR = 0,
     CGBL_LEVEL_WARNING,
     CGBL_LEVEL_INFORMATION,
-    CGBL_LEVEL_VERBOSE,
     CGBL_LEVEL_PROMPT,
     CGBL_LEVEL_MAX,
 } cgbl_level_e;
+
+typedef enum {
+    CGBL_OPERAND_NONE = 0,
+    CGBL_OPERAND_BYTE,
+    CGBL_OPERAND_WORD,
+    CGBL_OPERAND_MAX,
+} cgbl_operand_e;
+
+static const struct
+{
+    const char *format;
+    cgbl_operand_e operand;
+}
+INSTRUCTION[][CGBL_INSTRUCTION_MAX] =
+{
+    {
+        { "nop", CGBL_OPERAND_NONE, }, { "ld bc,$%04X", CGBL_OPERAND_WORD, }, { "ld (bc),a", CGBL_OPERAND_NONE, }, { "inc bc", CGBL_OPERAND_NONE, },
+        { "inc b", CGBL_OPERAND_NONE, }, { "dec b", CGBL_OPERAND_NONE, }, { "ld b,$%02X", CGBL_OPERAND_BYTE, }, { "rlca", CGBL_OPERAND_NONE, },
+        { "ld ($%04X),sp", CGBL_OPERAND_WORD, }, { "add hl,bc", CGBL_OPERAND_NONE, }, { "ld a,(bc)", CGBL_OPERAND_NONE, }, { "dec bc", CGBL_OPERAND_NONE, },
+        { "inc c", CGBL_OPERAND_NONE, }, { "dec c", CGBL_OPERAND_NONE, }, { "ld c,$%02X", CGBL_OPERAND_BYTE, }, { "rrca", CGBL_OPERAND_NONE, },
+        { "stop $%02X", CGBL_OPERAND_BYTE, }, { "ld de,$%04X", CGBL_OPERAND_WORD, }, { "ld (de),a", CGBL_OPERAND_NONE, }, { "inc de", CGBL_OPERAND_NONE, },
+        { "inc d", CGBL_OPERAND_NONE, }, { "dec d", CGBL_OPERAND_NONE, }, { "ld d,$%02X", CGBL_OPERAND_BYTE, }, { "rla", CGBL_OPERAND_NONE, },
+        { "jr $%02X", CGBL_OPERAND_BYTE, }, { "add hl,de", CGBL_OPERAND_NONE, }, { "ld a,(de)", CGBL_OPERAND_NONE, }, { "dec de", CGBL_OPERAND_NONE, },
+        { "inc e", CGBL_OPERAND_NONE, }, { "dec e", CGBL_OPERAND_NONE, }, { "ld e,$%02X", CGBL_OPERAND_BYTE, }, { "rra", CGBL_OPERAND_NONE, },
+        { "jr nz,$%02X", CGBL_OPERAND_BYTE, }, { "ld hl,$%04X", CGBL_OPERAND_WORD, }, { "ldi (hl),a", CGBL_OPERAND_NONE, }, { "inc hl", CGBL_OPERAND_NONE, },
+        { "inc h", CGBL_OPERAND_NONE, }, { "dec h", CGBL_OPERAND_NONE, }, { "ld h,$%02X", CGBL_OPERAND_BYTE, }, { "daa", CGBL_OPERAND_NONE, },
+        { "jr z,$%02X", CGBL_OPERAND_BYTE, }, { "add hl,hl", CGBL_OPERAND_NONE, }, { "ldi a,(hl)", CGBL_OPERAND_NONE, }, { "dec hl", CGBL_OPERAND_NONE, },
+        { "inc l", CGBL_OPERAND_NONE, }, { "dec l", CGBL_OPERAND_NONE, }, { "ld l,$%02X", CGBL_OPERAND_BYTE, }, { "cpl", CGBL_OPERAND_NONE, },
+        { "jr nc,$%02X", CGBL_OPERAND_BYTE, }, { "ld sp,$%04X", CGBL_OPERAND_WORD, }, { "ldd (hl),a", CGBL_OPERAND_NONE, }, { "inc sp", CGBL_OPERAND_NONE, },
+        { "inc (hl)", CGBL_OPERAND_NONE, }, { "dec (hl)", CGBL_OPERAND_NONE, }, { "ld (hl),$%02X", CGBL_OPERAND_BYTE, }, { "scf", CGBL_OPERAND_NONE, },
+        { "jr c,$%02X", CGBL_OPERAND_BYTE, }, { "add hl,sp", CGBL_OPERAND_NONE, }, { "ldd a,(hl)", CGBL_OPERAND_NONE, }, { "dec sp", CGBL_OPERAND_NONE, },
+        { "inc a", CGBL_OPERAND_NONE, }, { "dec a", CGBL_OPERAND_NONE, }, { "ld a,$%02X", CGBL_OPERAND_BYTE, }, { "ccf", CGBL_OPERAND_NONE, },
+        { "ld b,b", CGBL_OPERAND_NONE, }, { "ld b,c", CGBL_OPERAND_NONE, }, { "ld b,d", CGBL_OPERAND_NONE, }, { "ld b,e", CGBL_OPERAND_NONE, },
+        { "ld b,h", CGBL_OPERAND_NONE, }, { "ld b,l", CGBL_OPERAND_NONE, }, { "ld b,(hl)", CGBL_OPERAND_NONE, }, { "ld b,a", CGBL_OPERAND_NONE, },
+        { "ld c,b", CGBL_OPERAND_NONE, }, { "ld c,c", CGBL_OPERAND_NONE, }, { "ld c,d", CGBL_OPERAND_NONE, }, { "ld c,e", CGBL_OPERAND_NONE, },
+        { "ld c,h", CGBL_OPERAND_NONE, }, { "ld c,l", CGBL_OPERAND_NONE, }, { "ld c,(hl)", CGBL_OPERAND_NONE, }, { "ld c,a", CGBL_OPERAND_NONE, },
+        { "ld d,b", CGBL_OPERAND_NONE, }, { "ld d,c", CGBL_OPERAND_NONE, }, { "ld d,d", CGBL_OPERAND_NONE, }, { "ld d,e", CGBL_OPERAND_NONE, },
+        { "ld d,h", CGBL_OPERAND_NONE, }, { "ld d,l", CGBL_OPERAND_NONE, }, { "ld d,(hl)", CGBL_OPERAND_NONE, }, { "ld d,a", CGBL_OPERAND_NONE, },
+        { "ld e,b", CGBL_OPERAND_NONE, }, { "ld e,c", CGBL_OPERAND_NONE, }, { "ld e,d", CGBL_OPERAND_NONE, }, { "ld e,e", CGBL_OPERAND_NONE, },
+        { "ld e,h", CGBL_OPERAND_NONE, }, { "ld e,l", CGBL_OPERAND_NONE, }, { "ld e,(hl)", CGBL_OPERAND_NONE, }, { "ld e,a", CGBL_OPERAND_NONE, },
+        { "ld h,b", CGBL_OPERAND_NONE, }, { "ld h,c", CGBL_OPERAND_NONE, }, { "ld h,d", CGBL_OPERAND_NONE, }, { "ld h,e", CGBL_OPERAND_NONE, },
+        { "ld h,h", CGBL_OPERAND_NONE, }, { "ld h,l", CGBL_OPERAND_NONE, }, { "ld h,(hl)", CGBL_OPERAND_NONE, }, { "ld h,a", CGBL_OPERAND_NONE, },
+        { "ld l,b", CGBL_OPERAND_NONE, }, { "ld l,c", CGBL_OPERAND_NONE, }, { "ld l,d", CGBL_OPERAND_NONE, }, { "ld l,e", CGBL_OPERAND_NONE, },
+        { "ld l,h", CGBL_OPERAND_NONE, }, { "ld l,l", CGBL_OPERAND_NONE, }, { "ld l,(hl)", CGBL_OPERAND_NONE, }, { "ld l,a", CGBL_OPERAND_NONE, },
+        { "ld (hl),b", CGBL_OPERAND_NONE, }, { "ld (hl),c", CGBL_OPERAND_NONE, }, { "ld (hl),d", CGBL_OPERAND_NONE, }, { "ld (hl),e", CGBL_OPERAND_NONE, },
+        { "ld (hl),h", CGBL_OPERAND_NONE, }, { "ld (hl),l", CGBL_OPERAND_NONE, }, { "halt", CGBL_OPERAND_NONE, }, { "ld (hl),a", CGBL_OPERAND_NONE, },
+        { "ld a,b", CGBL_OPERAND_NONE, }, { "ld a,c", CGBL_OPERAND_NONE, }, { "ld a,d", CGBL_OPERAND_NONE, }, { "ld a,e", CGBL_OPERAND_NONE, },
+        { "ld a,h", CGBL_OPERAND_NONE, }, { "ld a,l", CGBL_OPERAND_NONE, }, { "ld a,(hl)", CGBL_OPERAND_NONE, }, { "ld a,a", CGBL_OPERAND_NONE, },
+        { "add a,b", CGBL_OPERAND_NONE, }, { "add a,c", CGBL_OPERAND_NONE, }, { "add a,d", CGBL_OPERAND_NONE, }, { "add a,e", CGBL_OPERAND_NONE, },
+        { "add a,h", CGBL_OPERAND_NONE, }, { "add a,l", CGBL_OPERAND_NONE, }, { "add a,(hl)", CGBL_OPERAND_NONE, }, { "add a,a", CGBL_OPERAND_NONE, },
+        { "adc a,b", CGBL_OPERAND_NONE, }, { "adc a,c", CGBL_OPERAND_NONE, }, { "adc a,d", CGBL_OPERAND_NONE, }, { "adc a,e", CGBL_OPERAND_NONE, },
+        { "adc a,h", CGBL_OPERAND_NONE, }, { "adc a,l", CGBL_OPERAND_NONE, }, { "adc a,(hl)", CGBL_OPERAND_NONE, }, { "adc a,a", CGBL_OPERAND_NONE, },
+        { "sub a,b", CGBL_OPERAND_NONE, }, { "sub a,c", CGBL_OPERAND_NONE, }, { "sub a,d", CGBL_OPERAND_NONE, }, { "sub a,e", CGBL_OPERAND_NONE, },
+        { "sub a,h", CGBL_OPERAND_NONE, }, { "sub a,l", CGBL_OPERAND_NONE, }, { "sub a,(hl)", CGBL_OPERAND_NONE, }, { "sub a,a", CGBL_OPERAND_NONE, },
+        { "sbc a,b", CGBL_OPERAND_NONE, }, { "sbc a,c", CGBL_OPERAND_NONE, }, { "sbc a,d", CGBL_OPERAND_NONE, }, { "sbc a,e", CGBL_OPERAND_NONE, },
+        { "sbc a,h", CGBL_OPERAND_NONE, }, { "sbc a,l", CGBL_OPERAND_NONE, }, { "sbc a,(hl)", CGBL_OPERAND_NONE, }, { "sbc a,a", CGBL_OPERAND_NONE, },
+        { "and a,b", CGBL_OPERAND_NONE, }, { "and a,c", CGBL_OPERAND_NONE, }, { "and a,d", CGBL_OPERAND_NONE, }, { "and a,e", CGBL_OPERAND_NONE, },
+        { "and a,h", CGBL_OPERAND_NONE, }, { "and a,l", CGBL_OPERAND_NONE, }, { "and a,(hl)", CGBL_OPERAND_NONE, }, { "and a,a", CGBL_OPERAND_NONE, },
+        { "xor a,b", CGBL_OPERAND_NONE, }, { "xor a,c", CGBL_OPERAND_NONE, }, { "xor a,d", CGBL_OPERAND_NONE, }, { "xor a,e", CGBL_OPERAND_NONE, },
+        { "xor a,h", CGBL_OPERAND_NONE, }, { "xor a,l", CGBL_OPERAND_NONE, }, { "xor a,(hl)", CGBL_OPERAND_NONE, }, { "xor a,a", CGBL_OPERAND_NONE, },
+        { "or a,b", CGBL_OPERAND_NONE, }, { "or a,c", CGBL_OPERAND_NONE, }, { "or a,d", CGBL_OPERAND_NONE, }, { "or a,e", CGBL_OPERAND_NONE, },
+        { "or a,h", CGBL_OPERAND_NONE, }, { "or a,l", CGBL_OPERAND_NONE, }, { "or a,(hl)", CGBL_OPERAND_NONE, }, { "or a,a", CGBL_OPERAND_NONE, },
+        { "cp a,b", CGBL_OPERAND_NONE, }, { "cp a,c", CGBL_OPERAND_NONE, }, { "cp a,d", CGBL_OPERAND_NONE, }, { "cp a,e", CGBL_OPERAND_NONE, },
+        { "cp a,h", CGBL_OPERAND_NONE, }, { "cp a,l", CGBL_OPERAND_NONE, }, { "cp a,(hl)", CGBL_OPERAND_NONE, }, { "cp a,a", CGBL_OPERAND_NONE, },
+        { "ret nz", CGBL_OPERAND_NONE, }, { "pop bc", CGBL_OPERAND_NONE, }, { "jp nz,$%04X", CGBL_OPERAND_WORD, }, { "jp $%04X", CGBL_OPERAND_WORD, },
+        { "call nz,$%04X", CGBL_OPERAND_WORD, }, { "push bc", CGBL_OPERAND_NONE, }, { "and a,$%02X", CGBL_OPERAND_BYTE, }, { "rst $00", CGBL_OPERAND_NONE, },
+        { "ret z", CGBL_OPERAND_NONE, }, { "ret", CGBL_OPERAND_NONE, }, { "jp z,$%04X", CGBL_OPERAND_WORD, }, { "???", CGBL_OPERAND_NONE, },
+        { "call z,$%04X", CGBL_OPERAND_WORD, }, { "call $%04X", CGBL_OPERAND_WORD, }, { "adc a,$%02X", CGBL_OPERAND_BYTE, }, { "rst $08", CGBL_OPERAND_NONE, },
+        { "ret nc", CGBL_OPERAND_NONE, }, { "pop de", CGBL_OPERAND_NONE, }, { "jp nc,$%04X", CGBL_OPERAND_WORD, }, { "???", CGBL_OPERAND_NONE, },
+        { "call nz,$%04X", CGBL_OPERAND_WORD, }, { "push de", CGBL_OPERAND_NONE, }, { "sub a,$%02X", CGBL_OPERAND_BYTE, }, { "rst $10", CGBL_OPERAND_NONE, },
+        { "ret c", CGBL_OPERAND_NONE, }, { "reti", CGBL_OPERAND_NONE, }, { "jp c,$%04X", CGBL_OPERAND_WORD, }, { "???", CGBL_OPERAND_NONE, },
+        { "call c,$%04X", CGBL_OPERAND_WORD, }, { "???", CGBL_OPERAND_NONE, }, { "sbc a,$%02X", CGBL_OPERAND_WORD, }, { "rst $18", CGBL_OPERAND_NONE, },
+        { "ld ($FF00+$%02X),a", CGBL_OPERAND_BYTE, }, { "pop hl", CGBL_OPERAND_NONE, }, { "ld ($FF00+c),a", CGBL_OPERAND_NONE, }, { "???", CGBL_OPERAND_NONE, },
+        { "???", CGBL_OPERAND_NONE, }, { "push hl", CGBL_OPERAND_NONE, }, { "and a,$%02X", CGBL_OPERAND_BYTE, }, { "rst $20", CGBL_OPERAND_NONE, },
+        { "add sp,$%02X", CGBL_OPERAND_BYTE, }, { "jp hl", CGBL_OPERAND_NONE, }, { "ld ($%04X),a", CGBL_OPERAND_WORD, }, { "???", CGBL_OPERAND_NONE, },
+        { "???", CGBL_OPERAND_NONE, }, { "???", CGBL_OPERAND_NONE, }, { "xor a,$%02X", CGBL_OPERAND_BYTE, }, { "rst $28", CGBL_OPERAND_NONE, },
+        { "ld a,($FF00+$%02X)", CGBL_OPERAND_BYTE, }, { "pop af", CGBL_OPERAND_NONE, }, { "ld a,($FF00+c)", CGBL_OPERAND_NONE, }, { "di", CGBL_OPERAND_NONE, },
+        { "???", CGBL_OPERAND_NONE, }, { "push af", CGBL_OPERAND_NONE, }, { "or a,$%02X", CGBL_OPERAND_BYTE, }, { "rst $30", CGBL_OPERAND_NONE, },
+        { "ld hl,sp+$%02X", CGBL_OPERAND_BYTE, }, { "ld sp,hl", CGBL_OPERAND_NONE, }, { "ld a,($%04X)", CGBL_OPERAND_WORD, }, { "ei", CGBL_OPERAND_BYTE, },
+        { "???", CGBL_OPERAND_NONE, }, { "???", CGBL_OPERAND_NONE, }, { "cp a,$%02X", CGBL_OPERAND_BYTE, }, { "rst $38", CGBL_OPERAND_NONE, },
+    },
+    {
+        { "rlc b", CGBL_OPERAND_NONE, }, { "rlc c", CGBL_OPERAND_NONE, }, { "rlc d", CGBL_OPERAND_NONE, }, { "rlc e", CGBL_OPERAND_NONE, },
+        { "rlc h", CGBL_OPERAND_NONE, }, { "rlc l", CGBL_OPERAND_NONE, }, { "rlc (hl)", CGBL_OPERAND_NONE, }, { "rlc a", CGBL_OPERAND_NONE, },
+        { "rrc b", CGBL_OPERAND_NONE, }, { "rrc c", CGBL_OPERAND_NONE, }, { "rrc d", CGBL_OPERAND_NONE, }, { "rrc e", CGBL_OPERAND_NONE, },
+        { "rrc h", CGBL_OPERAND_NONE, }, { "rrc l", CGBL_OPERAND_NONE, }, { "rrc (hl)", CGBL_OPERAND_NONE, }, { "rrc a", CGBL_OPERAND_NONE, },
+        { "rl b", CGBL_OPERAND_NONE, }, { "rl c", CGBL_OPERAND_NONE, }, { "rl d", CGBL_OPERAND_NONE, }, { "rl e", CGBL_OPERAND_NONE, },
+        { "rl h", CGBL_OPERAND_NONE, }, { "rl l", CGBL_OPERAND_NONE, }, { "rl (hl)", CGBL_OPERAND_NONE, }, { "rl a", CGBL_OPERAND_NONE, },
+        { "rr b", CGBL_OPERAND_NONE, }, { "rr c", CGBL_OPERAND_NONE, }, { "rr d", CGBL_OPERAND_NONE, }, { "rr e", CGBL_OPERAND_NONE, },
+        { "rr h", CGBL_OPERAND_NONE, }, { "rr l", CGBL_OPERAND_NONE, }, { "rr (hl)", CGBL_OPERAND_NONE, }, { "rr a", CGBL_OPERAND_NONE, },
+        { "sla b", CGBL_OPERAND_NONE, }, { "sla c", CGBL_OPERAND_NONE, }, { "sla d", CGBL_OPERAND_NONE, }, { "sla e", CGBL_OPERAND_NONE, },
+        { "sla h", CGBL_OPERAND_NONE, }, { "sla l", CGBL_OPERAND_NONE, }, { "sla (hl)", CGBL_OPERAND_NONE, }, { "sla a", CGBL_OPERAND_NONE, },
+        { "sra b", CGBL_OPERAND_NONE, }, { "sra c", CGBL_OPERAND_NONE, }, { "sra d", CGBL_OPERAND_NONE, }, { "sra e", CGBL_OPERAND_NONE, },
+        { "sra h", CGBL_OPERAND_NONE, }, { "sra l", CGBL_OPERAND_NONE, }, { "sra (hl)", CGBL_OPERAND_NONE, }, { "sra a", CGBL_OPERAND_NONE, },
+        { "swap b", CGBL_OPERAND_NONE, }, { "swap c", CGBL_OPERAND_NONE, }, { "swap d", CGBL_OPERAND_NONE, }, { "swap e", CGBL_OPERAND_NONE, },
+        { "swap h", CGBL_OPERAND_NONE, }, { "swap l", CGBL_OPERAND_NONE, }, { "swap (hl)", CGBL_OPERAND_NONE, }, { "swap a", CGBL_OPERAND_NONE, },
+        { "srl b", CGBL_OPERAND_NONE, }, { "srl c", CGBL_OPERAND_NONE, }, { "srl d", CGBL_OPERAND_NONE, }, { "srl e", CGBL_OPERAND_NONE, },
+        { "srl h", CGBL_OPERAND_NONE, }, { "srl l", CGBL_OPERAND_NONE, }, { "srl (hl)", CGBL_OPERAND_NONE, }, { "srl a", CGBL_OPERAND_NONE, },
+        { "bit 0,b", CGBL_OPERAND_NONE, }, { "bit 0,c", CGBL_OPERAND_NONE, }, { "bit 0,d", CGBL_OPERAND_NONE, }, { "bit 0,e", CGBL_OPERAND_NONE, },
+        { "bit 0,h", CGBL_OPERAND_NONE, }, { "bit 0,l", CGBL_OPERAND_NONE, }, { "bit 0,(hl)", CGBL_OPERAND_NONE, }, { "bit 0,a", CGBL_OPERAND_NONE, },
+        { "bit 1,b", CGBL_OPERAND_NONE, }, { "bit 1,c", CGBL_OPERAND_NONE, }, { "bit 1,d", CGBL_OPERAND_NONE, }, { "bit 1,e", CGBL_OPERAND_NONE, },
+        { "bit 1,h", CGBL_OPERAND_NONE, }, { "bit 1,l", CGBL_OPERAND_NONE, }, { "bit 1,(hl)", CGBL_OPERAND_NONE, }, { "bit 1,a", CGBL_OPERAND_NONE, },
+        { "bit 2,b", CGBL_OPERAND_NONE, }, { "bit 2,c", CGBL_OPERAND_NONE, }, { "bit 2,d", CGBL_OPERAND_NONE, }, { "bit 2,e", CGBL_OPERAND_NONE, },
+        { "bit 2,h", CGBL_OPERAND_NONE, }, { "bit 2,l", CGBL_OPERAND_NONE, }, { "bit 2,(hl)", CGBL_OPERAND_NONE, }, { "bit 2,a", CGBL_OPERAND_NONE, },
+        { "bit 3,b", CGBL_OPERAND_NONE, }, { "bit 3,c", CGBL_OPERAND_NONE, }, { "bit 3,d", CGBL_OPERAND_NONE, }, { "bit 3,e", CGBL_OPERAND_NONE, },
+        { "bit 3,h", CGBL_OPERAND_NONE, }, { "bit 3,l", CGBL_OPERAND_NONE, }, { "bit 3,(hl)", CGBL_OPERAND_NONE, }, { "bit 3,a", CGBL_OPERAND_NONE, },
+        { "bit 4,b", CGBL_OPERAND_NONE, }, { "bit 4,c", CGBL_OPERAND_NONE, }, { "bit 4,d", CGBL_OPERAND_NONE, }, { "bit 4,e", CGBL_OPERAND_NONE, },
+        { "bit 4,h", CGBL_OPERAND_NONE, }, { "bit 4,l", CGBL_OPERAND_NONE, }, { "bit 4,(hl)", CGBL_OPERAND_NONE, }, { "bit 4,a", CGBL_OPERAND_NONE, },
+        { "bit 5,b", CGBL_OPERAND_NONE, }, { "bit 5,c", CGBL_OPERAND_NONE, }, { "bit 5,d", CGBL_OPERAND_NONE, }, { "bit 5,e", CGBL_OPERAND_NONE, },
+        { "bit 5,h", CGBL_OPERAND_NONE, }, { "bit 5,l", CGBL_OPERAND_NONE, }, { "bit 5,(hl)", CGBL_OPERAND_NONE, }, { "bit 5,a", CGBL_OPERAND_NONE, },
+        { "bit 6,b", CGBL_OPERAND_NONE, }, { "bit 6,c", CGBL_OPERAND_NONE, }, { "bit 6,d", CGBL_OPERAND_NONE, }, { "bit 6,e", CGBL_OPERAND_NONE, },
+        { "bit 6,h", CGBL_OPERAND_NONE, }, { "bit 6,l", CGBL_OPERAND_NONE, }, { "bit 6,(hl)", CGBL_OPERAND_NONE, }, { "bit 6,a", CGBL_OPERAND_NONE, },
+        { "bit 7,b", CGBL_OPERAND_NONE, }, { "bit 7,c", CGBL_OPERAND_NONE, }, { "bit 7,d", CGBL_OPERAND_NONE, }, { "bit 7,e", CGBL_OPERAND_NONE, },
+        { "bit 7,h", CGBL_OPERAND_NONE, }, { "bit 7,l", CGBL_OPERAND_NONE, }, { "bit 7,(hl)", CGBL_OPERAND_NONE, }, { "bit 7,a", CGBL_OPERAND_NONE, },
+        { "res 0,b", CGBL_OPERAND_NONE, }, { "res 0,c", CGBL_OPERAND_NONE, }, { "res 0,d", CGBL_OPERAND_NONE, }, { "res 0,e", CGBL_OPERAND_NONE, },
+        { "res 0,h", CGBL_OPERAND_NONE, }, { "res 0,l", CGBL_OPERAND_NONE, }, { "res 0,(hl)", CGBL_OPERAND_NONE, }, { "res 0,a", CGBL_OPERAND_NONE, },
+        { "res 1,b", CGBL_OPERAND_NONE, }, { "res 1,c", CGBL_OPERAND_NONE, }, { "res 1,d", CGBL_OPERAND_NONE, }, { "res 1,e", CGBL_OPERAND_NONE, },
+        { "res 1,h", CGBL_OPERAND_NONE, }, { "res 1,l", CGBL_OPERAND_NONE, }, { "res 1,(hl)", CGBL_OPERAND_NONE, }, { "res 1,a", CGBL_OPERAND_NONE, },
+        { "res 2,b", CGBL_OPERAND_NONE, }, { "res 2,c", CGBL_OPERAND_NONE, }, { "res 2,d", CGBL_OPERAND_NONE, }, { "res 2,e", CGBL_OPERAND_NONE, },
+        { "res 2,h", CGBL_OPERAND_NONE, }, { "res 2,l", CGBL_OPERAND_NONE, }, { "res 2,(hl)", CGBL_OPERAND_NONE, }, { "res 2,a", CGBL_OPERAND_NONE, },
+        { "res 3,b", CGBL_OPERAND_NONE, }, { "res 3,c", CGBL_OPERAND_NONE, }, { "res 3,d", CGBL_OPERAND_NONE, }, { "res 3,e", CGBL_OPERAND_NONE, },
+        { "res 3,h", CGBL_OPERAND_NONE, }, { "res 3,l", CGBL_OPERAND_NONE, }, { "res 3,(hl)", CGBL_OPERAND_NONE, }, { "res 3,a", CGBL_OPERAND_NONE, },
+        { "res 4,b", CGBL_OPERAND_NONE, }, { "res 4,c", CGBL_OPERAND_NONE, }, { "res 4,d", CGBL_OPERAND_NONE, }, { "res 4,e", CGBL_OPERAND_NONE, },
+        { "res 4,h", CGBL_OPERAND_NONE, }, { "res 4,l", CGBL_OPERAND_NONE, }, { "res 4,(hl)", CGBL_OPERAND_NONE, }, { "res 4,a", CGBL_OPERAND_NONE, },
+        { "res 5,b", CGBL_OPERAND_NONE, }, { "res 5,c", CGBL_OPERAND_NONE, }, { "res 5,d", CGBL_OPERAND_NONE, }, { "res 5,e", CGBL_OPERAND_NONE, },
+        { "res 5,h", CGBL_OPERAND_NONE, }, { "res 5,l", CGBL_OPERAND_NONE, }, { "res 5,(hl)", CGBL_OPERAND_NONE, }, { "res 5,a", CGBL_OPERAND_NONE, },
+        { "res 6,b", CGBL_OPERAND_NONE, }, { "res 6,c", CGBL_OPERAND_NONE, }, { "res 6,d", CGBL_OPERAND_NONE, }, { "res 6,e", CGBL_OPERAND_NONE, },
+        { "res 6,h", CGBL_OPERAND_NONE, }, { "res 6,l", CGBL_OPERAND_NONE, }, { "res 6,(hl)", CGBL_OPERAND_NONE, }, { "res 6,a", CGBL_OPERAND_NONE, },
+        { "res 7,b", CGBL_OPERAND_NONE, }, { "res 7,c", CGBL_OPERAND_NONE, }, { "res 7,d", CGBL_OPERAND_NONE, }, { "res 7,e", CGBL_OPERAND_NONE, },
+        { "res 7,h", CGBL_OPERAND_NONE, }, { "res 7,l", CGBL_OPERAND_NONE, }, { "res 7,(hl)", CGBL_OPERAND_NONE, }, { "res 7,a", CGBL_OPERAND_NONE, },
+        { "set 0,b", CGBL_OPERAND_NONE, }, { "set 0,c", CGBL_OPERAND_NONE, }, { "set 0,d", CGBL_OPERAND_NONE, }, { "set 0,e", CGBL_OPERAND_NONE, },
+        { "set 0,h", CGBL_OPERAND_NONE, }, { "set 0,l", CGBL_OPERAND_NONE, }, { "set 0,(hl)", CGBL_OPERAND_NONE, }, { "set 0,a", CGBL_OPERAND_NONE, },
+        { "set 1,b", CGBL_OPERAND_NONE, }, { "set 1,c", CGBL_OPERAND_NONE, }, { "set 1,d", CGBL_OPERAND_NONE, }, { "set 1,e", CGBL_OPERAND_NONE, },
+        { "set 1,h", CGBL_OPERAND_NONE, }, { "set 1,l", CGBL_OPERAND_NONE, }, { "set 1,(hl)", CGBL_OPERAND_NONE, }, { "set 1,a", CGBL_OPERAND_NONE, },
+        { "set 2,b", CGBL_OPERAND_NONE, }, { "set 2,c", CGBL_OPERAND_NONE, }, { "set 2,d", CGBL_OPERAND_NONE, }, { "set 2,e", CGBL_OPERAND_NONE, },
+        { "set 2,h", CGBL_OPERAND_NONE, }, { "set 2,l", CGBL_OPERAND_NONE, }, { "set 2,(hl)", CGBL_OPERAND_NONE, }, { "set 2,a", CGBL_OPERAND_NONE, },
+        { "set 3,b", CGBL_OPERAND_NONE, }, { "set 3,c", CGBL_OPERAND_NONE, }, { "set 3,d", CGBL_OPERAND_NONE, }, { "set 3,e", CGBL_OPERAND_NONE, },
+        { "set 3,h", CGBL_OPERAND_NONE, }, { "set 3,l", CGBL_OPERAND_NONE, }, { "set 3,(hl)", CGBL_OPERAND_NONE, }, { "set 3,a", CGBL_OPERAND_NONE, },
+        { "set 4,b", CGBL_OPERAND_NONE, }, { "set 4,c", CGBL_OPERAND_NONE, }, { "set 4,d", CGBL_OPERAND_NONE, }, { "set 4,e", CGBL_OPERAND_NONE, },
+        { "set 4,h", CGBL_OPERAND_NONE, }, { "set 4,l", CGBL_OPERAND_NONE, }, { "set 4,(hl)", CGBL_OPERAND_NONE, }, { "set 4,a", CGBL_OPERAND_NONE, },
+        { "set 5,b", CGBL_OPERAND_NONE, }, { "set 5,c", CGBL_OPERAND_NONE, }, { "set 5,d", CGBL_OPERAND_NONE, }, { "set 5,e", CGBL_OPERAND_NONE, },
+        { "set 5,h", CGBL_OPERAND_NONE, }, { "set 5,l", CGBL_OPERAND_NONE, }, { "set 5,(hl)", CGBL_OPERAND_NONE, }, { "set 5,a", CGBL_OPERAND_NONE, },
+        { "set 6,b", CGBL_OPERAND_NONE, }, { "set 6,c", CGBL_OPERAND_NONE, }, { "set 6,d", CGBL_OPERAND_NONE, }, { "set 6,e", CGBL_OPERAND_NONE, },
+        { "set 6,h", CGBL_OPERAND_NONE, }, { "set 6,l", CGBL_OPERAND_NONE, }, { "set 6,(hl)", CGBL_OPERAND_NONE, }, { "set 6,a", CGBL_OPERAND_NONE, },
+        { "set 7,b", CGBL_OPERAND_NONE, }, { "set 7,c", CGBL_OPERAND_NONE, }, { "set 7,d", CGBL_OPERAND_NONE, }, { "set 7,e", CGBL_OPERAND_NONE, },
+        { "set 7,h", CGBL_OPERAND_NONE, }, { "set 7,l", CGBL_OPERAND_NONE, }, { "set 7,(hl)", CGBL_OPERAND_NONE, }, { "set 7,a", CGBL_OPERAND_NONE, },
+    },
+};
+
 
 static const char *INTERRUPT[CGBL_INTERRUPT_MAX] = {
     "vblk", "lcdc", "tmr", "ser",
@@ -60,11 +206,11 @@ static const struct {
     uint8_t max;
 } OPTION[CGBL_COMMAND_MAX] = {
     { .name = "exit", .description = "Exit debug console", .usage = "exit", .min = 1, .max = 1, },
-    { .name = "dasm", .description = "Disassemble instructions", .usage = "dasm addr [len]", .min = 2, .max = 3, },
+    { .name = "dasm", .description = "Disassemble instructions", .usage = "dasm addr [off]", .min = 2, .max = 3, },
     { .name = "help", .description = "Display help information", .usage = "help", .min = 1, .max = 1, },
     { .name = "itr", .description = "Interrupt bus", .usage = "itr int", .min = 2, .max = 2, },
-    { .name = "memr", .description = "Read data from memory", .usage = "memr addr [len]", .min = 2, .max = 3, },
-    { .name = "memw", .description = "Write data to memory", .usage = "memw addr data [len]", .min = 3, .max = 4, },
+    { .name = "memr", .description = "Read data from memory", .usage = "memr addr [off]", .min = 2, .max = 3, },
+    { .name = "memw", .description = "Write data to memory", .usage = "memw addr data [off]", .min = 3, .max = 4, },
     { .name = "proc", .description = "Display processor information", .usage = "proc", .min = 1, .max = 1, },
     { .name = "regr", .description = "Read data from register", .usage = "regr reg", .min = 2, .max = 2, },
     { .name = "regw", .description = "Write data to register", .usage = "regw reg data", .min = 3, .max = 3, },
@@ -88,7 +234,6 @@ static const struct {
     { "\x1B[31m", "\x1B[m", },
     { "\x1B[93m", "\x1B[m", },
     { "\x1B[0m", "\x1B[m", },
-    { "\x1B[37m", "\x1B[m", },
     { "\x1B[32m", "\x1B[m", },
 };
 
@@ -120,15 +265,81 @@ static inline void cgbl_debug_trace(cgbl_level_e level, const char *const format
     fprintf(stream, "%s%s%s", TRACE[level].begin, buffer, TRACE[level].end);
 }
 
-static inline void cgbl_debug_disassemble(uint16_t address, uint16_t length)
+static inline void cgbl_debug_disassemble_instruction(uint16_t *address, bool verbose)
 {
-    if (length > 1)
+    uint8_t data[4] = {}, length = 0;
+    const char *format = NULL;
+    cgbl_operand_e operand = CGBL_OPERAND_NONE;
+    if (verbose)
     {
-        /* TODO */
+        TRACE_INFORMATION("%04X |", *address);
+    }
+    data[length++] = cgbl_bus_read((*address)++);
+    if (data[length - 1] == CGBL_INSTRUCTION_PREFIX)
+    {
+        data[length++] = cgbl_bus_read((*address)++);
+        format = INSTRUCTION[1][data[length - 1]].format;
+        operand = INSTRUCTION[1][data[length - 1]].operand;
     }
     else
     {
-        /* TODO */
+        format = INSTRUCTION[0][data[length - 1]].format;
+        operand = INSTRUCTION[0][data[length - 1]].operand;
+    }
+    switch (operand)
+    {
+        case CGBL_OPERAND_BYTE:
+            data[length++] = cgbl_bus_read((*address)++);
+            break;
+        case CGBL_OPERAND_WORD:
+            data[length++] = cgbl_bus_read((*address)++);
+            data[length++] = cgbl_bus_read((*address)++);
+            break;
+        default:
+            break;
+    }
+    if (verbose)
+    {
+        for (uint8_t index = 0; index < CGBL_LENGTH(data); ++index)
+        {
+            if (index < length)
+            {
+                TRACE_INFORMATION(" %02X", data[index]);
+            }
+            else
+            {
+                TRACE_INFORMATION("   ");
+            }
+        }
+    }
+    switch (operand)
+    {
+        case CGBL_OPERAND_BYTE:
+            TRACE_INFORMATION(format, data[length - 1]);
+            break;
+        case CGBL_OPERAND_WORD:
+            TRACE_INFORMATION(format, *(uint16_t *)&data[length - 2]);
+            break;
+        default:
+            TRACE_INFORMATION(format);
+            break;
+    }
+    TRACE_INFORMATION("\n");
+}
+
+static inline void cgbl_debug_disassemble(uint16_t address, uint32_t offset)
+{
+    if (offset > 1)
+    {
+        TRACE_INFORMATION("[%04X, %u instructions]\n\n", address, offset);
+        for (uint32_t index = 0; index < offset; ++index)
+        {
+            cgbl_debug_disassemble_instruction(&address, true);
+        }
+    }
+    else
+    {
+        cgbl_debug_disassemble_instruction(&address, false);
     }
 }
 
@@ -143,6 +354,66 @@ static inline cgbl_interrupt_e cgbl_debug_interrupt(const char *const name)
         }
     }
     return result;
+}
+
+static inline void cgbl_debug_memory(uint16_t address, uint32_t offset)
+{
+    if (offset > 1)
+    {
+        char buffer[17] = {};
+        uint32_t begin = address, end = (address + offset) & 0xFFFF;
+        if (begin % 16)
+        {
+            begin -= begin % 16;
+        }
+        if (end % 16)
+        {
+            end += 16 - (end % 16);
+        }
+        TRACE_INFORMATION("[%04X-%04X, %u bytes]\n\n      ", address, (address + offset - 1) & 0xFFFF, offset);
+        for (uint32_t index = 0; index < 16; ++index)
+        {
+            TRACE_INFORMATION(" %02X", index);
+        }
+        TRACE_INFORMATION("\n      ");
+        for (uint32_t index = 0; index < 16; ++index)
+        {
+            TRACE_INFORMATION(" --");
+        }
+        for (uint32_t index = begin; index < end; ++index)
+        {
+            if (!(index % 16))
+            {
+                if (strlen(buffer))
+                {
+                    TRACE_INFORMATION("   %s", buffer);
+                    memset(buffer, 0, sizeof (buffer));
+                }
+                TRACE_INFORMATION("\n%04X |", index);
+            }
+            if ((index >= address) && (index < ((address + offset) & 0xFFFF)))
+            {
+                uint8_t value = cgbl_bus_read(index);
+                TRACE_INFORMATION(" %02X", value);
+                buffer[index % 16] = (!isprint(value) || isspace(value)) ? '.' : value;
+            }
+            else
+            {
+                TRACE_INFORMATION(" --");
+                buffer[index % 16] = '.';
+            }
+        }
+        if (strlen(buffer))
+        {
+            TRACE_INFORMATION("   %s", buffer);
+            memset(buffer, 0, sizeof (buffer));
+        }
+        TRACE_INFORMATION("\n");
+    }
+    else
+    {
+        TRACE_INFORMATION("%02X\n", cgbl_bus_read(address));
+    }
 }
 
 static inline cgbl_register_e cgbl_debug_register(const char *const name)
@@ -176,7 +447,8 @@ static cgbl_error_e cgbl_debug_command_exit(const char **const arguments, uint8_
 
 static cgbl_error_e cgbl_debug_command_disassemble(const char **const arguments, uint8_t length)
 {
-    uint16_t address = 0, offset = 1;
+    uint16_t address = 0;
+    uint32_t offset = 1;
     cgbl_register_t data = {};
     if (cgbl_debug_register_data(arguments[1], &data) == CGBL_SUCCESS)
     {
@@ -188,7 +460,11 @@ static cgbl_error_e cgbl_debug_command_disassemble(const char **const arguments,
     }
     if (length == OPTION[CGBL_COMMAND_DISASSEMBLE].max)
     {
-        offset = strtol(arguments[length - 1], NULL, 16);
+        if ((offset = strtol(arguments[length - 1], NULL, 16)) > 0x100)
+        {
+            TRACE_ERROR("Offset too large: %08X\n", offset);
+            return CGBL_FAILURE;
+        }
     }
     cgbl_debug_disassemble(address, offset);
     return CGBL_SUCCESS;
@@ -214,6 +490,7 @@ static cgbl_error_e cgbl_debug_command_interrupt(const char **const arguments, u
     cgbl_interrupt_e interrupt = cgbl_debug_interrupt(arguments[1]);
     if (interrupt >= CGBL_INTERRUPT_MAX)
     {
+        TRACE_ERROR("Unsupported interrupt: \"%s\"\n", arguments[1]);
         return CGBL_FAILURE;
     }
     cgbl_processor_interrupt(interrupt);
@@ -222,7 +499,8 @@ static cgbl_error_e cgbl_debug_command_interrupt(const char **const arguments, u
 
 static cgbl_error_e cgbl_debug_command_memory_read(const char **const arguments, uint8_t length)
 {
-    uint16_t address = 0, offset = 1;
+    uint16_t address = 0;
+    uint32_t offset = 1;
     cgbl_register_t data = {};
     if (cgbl_debug_register_data(arguments[1], &data) == CGBL_SUCCESS)
     {
@@ -234,22 +512,20 @@ static cgbl_error_e cgbl_debug_command_memory_read(const char **const arguments,
     }
     if (length == OPTION[CGBL_COMMAND_MEMORY_READ].max)
     {
-        offset = strtol(arguments[length - 1], NULL, 16);
+        if ((offset = strtol(arguments[length - 1], NULL, 16)) > 0xFFFF)
+        {
+            TRACE_ERROR("Offset too large: %08X\n", offset);
+            return CGBL_FAILURE;
+        }
     }
-    if (offset > 1)
-    {
-        /* TODO */
-    }
-    else
-    {
-        TRACE_INFORMATION("%02X\n", cgbl_bus_read(address));
-    }
+    cgbl_debug_memory(address, offset);
     return CGBL_SUCCESS;
 }
 
 static cgbl_error_e cgbl_debug_command_memory_write(const char **const arguments, uint8_t length)
 {
-    uint16_t address = 0, offset = 1;
+    uint16_t address = 0;
+    uint32_t offset = 1;
     cgbl_register_t data = {};
     if (cgbl_debug_register_data(arguments[1], &data) == CGBL_SUCCESS)
     {
@@ -262,7 +538,11 @@ static cgbl_error_e cgbl_debug_command_memory_write(const char **const arguments
     data.low = strtol(arguments[2], NULL, 16);
     if (length == OPTION[CGBL_COMMAND_MEMORY_WRITE].max)
     {
-        offset = strtol(arguments[length - 1], NULL, 16);
+        if ((offset = strtol(arguments[length - 1], NULL, 16)) > 0xFFFF)
+        {
+            TRACE_ERROR("Offset too large: %08X\n", offset);
+            return CGBL_FAILURE;
+        }
     }
     for (uint32_t index = address; index < address + offset; ++index)
     {
@@ -464,8 +744,8 @@ static char **cgbl_debug_completion(const char *text, int start, int end)
 static void cgbl_debug_header(void)
 {
     const cgbl_version_t *const version = cgbl_version();
-    TRACE_VERBOSE("CGBL %u.%u-%x\n", version->major, version->minor, version->patch);
-    TRACE_VERBOSE("Path: %s\n", (debug.path && strlen(debug.path)) ? debug.path : "Undefined");
+    TRACE_INFORMATION("CGBL %u.%u-%x\n", version->major, version->minor, version->patch);
+    TRACE_INFORMATION("Path: %s\n", (debug.path && strlen(debug.path)) ? debug.path : "Undefined");
 }
 
 static const char *cgbl_debug_prompt(void)

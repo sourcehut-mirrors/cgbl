@@ -46,21 +46,21 @@ cgbl --scale [1-8] rom.gbc
 
 ## Debugger
 
-|Command        |Description                  |
-|:--------------|:----------------------------|
-|exit           |Exit debug console           |
-|dasm addr [len]|Disassemble instructions     |
-|help           |Display help information     |
-|itr int        |Interrupt bus                |
-|memr addr      |Read data from memory       |
-|memw addr data |Write data to memory        |
-|proc           |Display processor information|
-|regr reg       |Read data from register     |
-|regw reg data  |Write data to register      |
-|rst            |Reset bus                    |
-|run [bp]       |Run to breakpoint            |
-|step [bp]      |Step to next instruction     |
-|ver            |Display version information  |
+|Command             |Description                  |
+|:-------------------|:----------------------------|
+|exit                |Exit debug console           |
+|dasm addr [off]     |Disassemble instructions     |
+|help                |Display help information     |
+|itr int             |Interrupt bus                |
+|memr addr [off]     |Read data from memory        |
+|memw addr data [off]|Write data to memory         |
+|proc                |Display processor information|
+|regr reg            |Read data from register      |
+|regw reg data       |Write data to register       |
+|rst                 |Reset bus                    |
+|run [bp]            |Run to breakpoint            |
+|step [bp]           |Step to next instruction     |
+|ver                 |Display version information  |
 
 ## Keybindings
 
