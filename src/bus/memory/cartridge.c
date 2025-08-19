@@ -12,7 +12,7 @@
 #include "mapper_3.h"
 #include "mapper_5.h"
 
-typedef struct {
+typedef struct __attribute__((packed)) {
     union {
         uint8_t counter : 6;
         uint8_t raw;
@@ -45,14 +45,15 @@ typedef struct {
     void (*write)(uint16_t address, uint8_t data);
 } cgbl_mapper_t;
 
-typedef struct {
+typedef struct __attribute__((packed)) {
     uint32_t magic;
     uint32_t length;
-    union {
+    struct {
         struct {
-            uint16_t major : 4;
-            uint16_t minor : 4;
+            uint8_t major;
+            uint8_t minor;
         } version;
+        uint8_t reserved;
     } attribute;
     cgbl_clock_t clock;
     uint8_t data[];
@@ -165,9 +166,10 @@ static cgbl_error_e cgbl_cartridge_ram_reset(cgbl_bank_t *const bank)
     if (ram->magic == CGBL_CARTRIDGE_RAM_MAGIC)
     {
         if ((ram->attribute.version.major > CGBL_VERSION_MAJOR)
-            || (ram->attribute.version.major > CGBL_VERSION_MINOR))
+            || (ram->attribute.version.major > CGBL_VERSION_MINOR)
+            || (ram->attribute.reserved != 0))
         {
-            return CGBL_ERROR("Unsupported ram header version: %u.%u", ram->attribute.version.major, ram->attribute.version.minor);
+            return CGBL_ERROR("Unsupported ram header attributes");
         }
         if (ram->length != (cartridge.ram.count * CGBL_CARTRIDGE_RAM_WIDTH))
         {
