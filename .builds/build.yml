@@ -3,6 +3,8 @@
 
 image: archlinux
 packages:
+  - clang
+  - gcc
   - readline
   - sdl2
   - sdl3
@@ -11,10 +13,14 @@ sources:
 environment:
   BUILD_SUBMITTER: git.sr.ht
 tasks:
-  - build-sdl2: |
-      cd cgbl && make clean && make CLIENT=sdl2
-  - build-sdl3: |
-      cd cgbl && make clean && make CLIENT=sdl3
+  - build-clang-sdl2: |
+      cd cgbl && make clean && make CC=clang CLIENT=sdl2
+  - build-clang-sdl3: |
+      cd cgbl && make clean && make CC=clang CLIENT=sdl3
+  - build-gcc-sdl2: |
+      cd cgbl && make clean && make CC=gcc CLIENT=sdl2
+  - build-gcc-sdl3: |
+      cd cgbl && make clean && make CC=gcc CLIENT=sdl3
 triggers:
   - action: email
     condition: failure
