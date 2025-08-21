@@ -23,7 +23,7 @@ cgbl_error_e cgbl_file_read(const char *const path, uint8_t **const buffer, uint
     cgbl_error_e result = CGBL_SUCCESS;
     if (!(file = fopen(path, "rb")))
     {
-        return CGBL_ERROR("Failed to open file: %s", path);
+        return CGBL_ERROR("Failed to open file: \'%s\'", path);
     }
     fseek(file, 0, SEEK_END);
     *length = ftell(file);
@@ -32,7 +32,7 @@ cgbl_error_e cgbl_file_read(const char *const path, uint8_t **const buffer, uint
     {
         if (fread(*buffer, sizeof (**buffer), *length, file) != *length)
         {
-            result = CGBL_ERROR("Failed to read file: %s", path);
+            result = CGBL_ERROR("Failed to read file: \'%s\'", path);
         }
     }
     fclose(file);
@@ -45,11 +45,11 @@ cgbl_error_e cgbl_file_write(const char *const path, const uint8_t *const buffer
     cgbl_error_e result = CGBL_SUCCESS;
     if (!(file = fopen(path, "wb")))
     {
-        return CGBL_ERROR("Failed to open file: %s", path);
+        return CGBL_ERROR("Failed to open file: \'%s\'", path);
     }
     if (fwrite(buffer, sizeof (*buffer), length, file) != length)
     {
-        result = CGBL_ERROR("Failed to write file: %s", path);
+        result = CGBL_ERROR("Failed to write file: \'%s\'", path);
     }
     fclose(file);
     return result;
