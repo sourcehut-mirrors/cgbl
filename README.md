@@ -74,7 +74,6 @@ cgbl --scale [1-8] rom.gbc
 |Left   |Left-Arrow |Left-Dpad |
 |Up     |Up-Arrow   |Up-Dpad   |
 |Down   |Down-Arrow |Down-Dpad |
-|Quit   |Escape     |Guide     |
 
 ## Mappers
 

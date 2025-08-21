@@ -105,14 +105,10 @@ static void cgbl_client_controller_detect(void)
     }
 }
 
-static cgbl_error_e cgbl_client_controller_sync(const SDL_ControllerDeviceEvent *const device, const SDL_ControllerButtonEvent *const button)
+static void cgbl_client_controller_sync(const SDL_ControllerDeviceEvent *const device, const SDL_ControllerButtonEvent *const button)
 {
     if (client.controller && (device->which == SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(client.controller))))
     {
-        if (button->button == SDL_CONTROLLER_BUTTON_GUIDE)
-        {
-            return CGBL_QUIT;
-        }
         for (cgbl_button_e index = 0; index < CGBL_BUTTON_MAX; ++index)
         {
             if (button->button == BUTTON[index])
@@ -122,7 +118,6 @@ static cgbl_error_e cgbl_client_controller_sync(const SDL_ControllerDeviceEvent 
             }
         }
     }
-    return CGBL_SUCCESS;
 }
 
 static void cgbl_client_frame_begin(void)
@@ -151,14 +146,10 @@ static void cgbl_client_frame_end(void)
     }
 }
 
-static cgbl_error_e cgbl_client_keyboard_sync(const SDL_KeyboardEvent *const key)
+static void cgbl_client_keyboard_sync(const SDL_KeyboardEvent *const key)
 {
     if (!key->repeat)
     {
-        if (key->keysym.scancode == SDL_SCANCODE_ESCAPE)
-        {
-            return CGBL_QUIT;
-        }
         for (cgbl_button_e index = 0; index < CGBL_BUTTON_MAX; ++index)
         {
             if (key->keysym.scancode == KEY[index])
@@ -168,7 +159,6 @@ static cgbl_error_e cgbl_client_keyboard_sync(const SDL_KeyboardEvent *const key
             }
         }
     }
-    return CGBL_SUCCESS;
 }
 
 static cgbl_error_e cgbl_client_video_create(uint8_t scale, bool fullscreen)
@@ -303,10 +293,7 @@ cgbl_error_e cgbl_client_poll(void)
         {
             case SDL_CONTROLLERBUTTONDOWN:
             case SDL_CONTROLLERBUTTONUP:
-                if ((result = cgbl_client_controller_sync(&event.cdevice, &event.cbutton)) != CGBL_SUCCESS)
-                {
-                    return result;
-                }
+                cgbl_client_controller_sync(&event.cdevice, &event.cbutton);
                 break;
             case SDL_CONTROLLERDEVICEADDED:
                 cgbl_client_controller_create(&event.cdevice);
@@ -316,10 +303,7 @@ cgbl_error_e cgbl_client_poll(void)
                 break;
             case SDL_KEYDOWN:
             case SDL_KEYUP:
-                if ((result = cgbl_client_keyboard_sync(&event.key)) != CGBL_SUCCESS)
-                {
-                    return result;
-                }
+                cgbl_client_keyboard_sync(&event.key);
                 break;
             case SDL_QUIT:
                 return CGBL_QUIT;

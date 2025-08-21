@@ -135,14 +135,10 @@ static void cgbl_client_gamepad_detect(void)
     }
 }
 
-static cgbl_error_e cgbl_client_gamepad_sync(const SDL_GamepadDeviceEvent *const device, const SDL_GamepadButtonEvent *const button)
+static void cgbl_client_gamepad_sync(const SDL_GamepadDeviceEvent *const device, const SDL_GamepadButtonEvent *const button)
 {
     if (client.gamepad && (device->which == SDL_GetJoystickID(SDL_GetGamepadJoystick(client.gamepad))))
     {
-        if (button->button == SDL_GAMEPAD_BUTTON_GUIDE)
-        {
-            return CGBL_QUIT;
-        }
         for (cgbl_button_e index = 0; index < CGBL_BUTTON_MAX; ++index)
         {
             if (button->button == BUTTON[index])
@@ -152,17 +148,12 @@ static cgbl_error_e cgbl_client_gamepad_sync(const SDL_GamepadDeviceEvent *const
             }
         }
     }
-    return CGBL_SUCCESS;
 }
 
-static cgbl_error_e cgbl_client_keyboard_sync(const SDL_KeyboardEvent *const key)
+static void cgbl_client_keyboard_sync(const SDL_KeyboardEvent *const key)
 {
     if (!key->repeat)
     {
-        if (key->scancode == SDL_SCANCODE_ESCAPE)
-        {
-            return CGBL_QUIT;
-        }
         for (cgbl_button_e index = 0; index < CGBL_BUTTON_MAX; ++index)
         {
             if (key->scancode == KEY[index])
@@ -172,7 +163,6 @@ static cgbl_error_e cgbl_client_keyboard_sync(const SDL_KeyboardEvent *const key
             }
         }
     }
-    return CGBL_SUCCESS;
 }
 
 static cgbl_error_e cgbl_client_video_create(uint8_t scale, bool fullscreen)
@@ -309,10 +299,7 @@ cgbl_error_e cgbl_client_poll(void)
         {
             case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
             case SDL_EVENT_GAMEPAD_BUTTON_UP:
-                if ((result = cgbl_client_gamepad_sync(&event.gdevice, &event.gbutton)) != CGBL_SUCCESS)
-                {
-                    return result;
-                }
+                cgbl_client_gamepad_sync(&event.gdevice, &event.gbutton);
                 break;
             case SDL_EVENT_GAMEPAD_ADDED:
                 cgbl_client_gamepad_create(&event.gdevice);
@@ -322,10 +309,7 @@ cgbl_error_e cgbl_client_poll(void)
                 break;
             case SDL_EVENT_KEY_DOWN:
             case SDL_EVENT_KEY_UP:
-                if ((result = cgbl_client_keyboard_sync(&event.key)) != CGBL_SUCCESS)
-                {
-                    return result;
-                }
+                cgbl_client_keyboard_sync(&event.key);
                 break;
             case SDL_EVENT_QUIT:
                 return CGBL_QUIT;
