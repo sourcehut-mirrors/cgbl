@@ -500,7 +500,7 @@ static cgbl_error_e cgbl_debug_command_cartridge(const char **const arguments, u
     if (debug.rom->data)
     {
         uint8_t value = 0;
-        char title[12] = {};
+        char title[CGBL_CARTRIDGE_HEADER_TITLE_WIDTH] = {};
         const char *name = NULL;
         for (uint32_t index = 0; index < (sizeof (title) - 1); ++index)
         {

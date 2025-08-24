@@ -95,7 +95,7 @@ static const uint16_t ROM[] = {
 
 static struct {
     uint8_t hash;
-    char title[12];
+    char title[CGBL_CARTRIDGE_HEADER_TITLE_WIDTH];
     const cgbl_mapper_t *mapper;
     struct {
         uint32_t delay;
