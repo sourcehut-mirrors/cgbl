@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include "cartridge.h"
 #include "client.h"
 #include "debug.h"
 #include "processor.h"
@@ -21,6 +22,10 @@
 
 typedef enum {
     CGBL_COMMAND_EXIT = 0,
+    CGBL_COMMAND_CARTRIDGE,
+    CGBL_COMMAND_CLOCK_LATCH,
+    CGBL_COMMAND_CLOCK_READ,
+    CGBL_COMMAND_CLOCK_WRITE,
     CGBL_COMMAND_DISASSEMBLE,
     CGBL_COMMAND_HELP,
     CGBL_COMMAND_INTERRUPT,
@@ -50,6 +55,11 @@ typedef enum {
     CGBL_OPERAND_WORD,
     CGBL_OPERAND_MAX,
 } cgbl_operand_e;
+
+static const char *CLOCK[CGBL_CLOCK_MAX] = {
+    "", "sec", "min", "hr",
+    "dayl", "dayh",
+};
 
 static const struct
 {
@@ -199,6 +209,35 @@ static const char *INTERRUPT[CGBL_INTERRUPT_MAX] = {
 };
 
 static const struct {
+    uint8_t type;
+    const char *name;
+} MAPPER[] = {
+    { 0, "MBC0" }, { 8, "MBC0" }, { 9, "MBC0" },
+    { 1, "MBC1" }, { 2, "MBC1" }, { 3, "MBC1" },
+    { 5, "MBC2" }, { 6, "MBC2" },
+    { 15, "MBC3" }, { 16, "MBC3" }, { 17, "MBC3" }, { 18, "MBC3" },
+    { 19, "MBC3" },
+    { 25, "MBC5" }, { 26, "MBC5" }, { 27, "MBC5" }, { 28, "MBC5" },
+    { 29, "MBC5" }, { 30, "MBC5" },
+};
+
+static const struct {
+    uint8_t type;
+    const char *name;
+} MODE[] = {
+    { 0x00, "DMG" }, { 0x80, "DMG" },
+    { 0xC0, "CGB" },
+};
+
+static const uint16_t RAM[] = {
+    1, 1, 1, 4, 16, 8,
+};
+
+static const uint16_t ROM[] = {
+    2, 4, 8, 16, 32, 64, 128, 256, 512,
+};
+
+static const struct {
     const char *name;
     const char *description;
     const char *usage;
@@ -206,6 +245,10 @@ static const struct {
     uint8_t max;
 } OPTION[CGBL_COMMAND_MAX] = {
     { .name = "exit", .description = "Exit debug console", .usage = "exit", .min = 1, .max = 1, },
+    { .name = "cart", .description = "Display cartridge information", .usage = "cart", .min = 1, .max = 1, },
+    { .name = "clkl", .description = "Latch clock", .usage = "clkl", .min = 1, .max = 1, },
+    { .name = "clkr", .description = "Read data from clock", .usage = "clkr clk", .min = 2, .max = 2, },
+    { .name = "clkw", .description = "Write data to clock", .usage = "clkw clk data", .min = 3, .max = 3, },
     { .name = "dasm", .description = "Disassemble instructions", .usage = "dasm addr [off]", .min = 2, .max = 3, },
     { .name = "help", .description = "Display help information", .usage = "help", .min = 1, .max = 1, },
     { .name = "itr", .description = "Interrupt bus", .usage = "itr int", .min = 2, .max = 2, },
@@ -263,6 +306,19 @@ static inline void cgbl_debug_trace(cgbl_level_e level, const char *const format
             break;
     }
     fprintf(stream, "%s%s%s", TRACE[level].begin, buffer, TRACE[level].end);
+}
+
+static inline cgbl_clock_e cgbl_debug_clock(const char *const name)
+{
+    cgbl_clock_e result = CGBL_CLOCK_SECOND;
+    for (; result < CGBL_CLOCK_MAX; ++result)
+    {
+        if (!strcmp(name, CLOCK[result]))
+        {
+            break;
+        }
+    }
+    return result;
 }
 
 static inline void cgbl_debug_disassemble_instruction(uint16_t *address, bool verbose)
@@ -439,9 +495,88 @@ static inline cgbl_error_e cgbl_debug_register_data(const char *const name, cgbl
     return CGBL_FAILURE;
 }
 
-static cgbl_error_e cgbl_debug_command_exit(const char **const arguments, uint8_t length)
+static cgbl_error_e cgbl_debug_command_cartridge(const char **const arguments, uint8_t length)
 {
-    CGBL_TRACE_INFORMATION("Exiting\n");
+    if (debug.rom->data)
+    {
+        uint8_t value = 0;
+        char title[12] = {};
+        const char *name = NULL;
+        for (uint32_t index = 0; index < (sizeof (title) - 1); ++index)
+        {
+            title[index] = cgbl_bus_read(CGBL_CARTRIDGE_HEADER_TITLE_BEGIN + index);
+            if (!title[index])
+            {
+                break;
+            }
+
+        }
+        CGBL_TRACE_INFORMATION("Title:    %s\n", strlen(title) ? title : "UNDEFINED");
+        value = cgbl_bus_read(CGBL_CARTRIDGE_HEADER_ROM);
+        CGBL_TRACE_INFORMATION("Rom:      %02X (%u banks, %u bytes)\n", value, (value < CGBL_LENGTH(ROM)) ? ROM[value] : ROM[0],
+            ((value < CGBL_LENGTH(ROM)) ? ROM[value] : ROM[0]) * CGBL_CARTRIDGE_ROM_WIDTH);
+        value = cgbl_bus_read(CGBL_CARTRIDGE_HEADER_RAM);
+        CGBL_TRACE_INFORMATION("Ram:      %02X (%u banks, %u bytes)\n", value, (value < CGBL_LENGTH(RAM)) ? RAM[value] : RAM[0],
+            ((value < CGBL_LENGTH(RAM)) ? RAM[value] : RAM[0]) * CGBL_CARTRIDGE_RAM_WIDTH);
+        name = NULL;
+        value = cgbl_bus_read(CGBL_CARTRIDGE_HEADER_MODE);
+        for (uint32_t index = 0; index < CGBL_LENGTH(MODE); ++index)
+        {
+            if (MODE[index].type == value)
+            {
+                name = MODE[index].name;
+                break;
+            }
+        }
+        CGBL_TRACE_INFORMATION("Mode:     %02X (%s)\n", value, name && strlen(name) ? name : "???");
+        name = NULL;
+        value = cgbl_bus_read(CGBL_CARTRIDGE_HEADER_MAPPER);
+        for (uint32_t index = 0; index < CGBL_LENGTH(MAPPER); ++index)
+        {
+            if (MAPPER[index].type == value)
+            {
+                name = MAPPER[index].name;
+                break;
+            }
+        }
+        CGBL_TRACE_INFORMATION("Mapper:   %02X (%s)\n", value, name && strlen(name) ? name : "????");
+        CGBL_TRACE_INFORMATION("Checksum: %02X\n", cgbl_bus_read(CGBL_CARTRIDGE_HEADER_CHECKSUM));
+    }
+    if (debug.ram->data)
+    {
+        CGBL_TRACE_INFORMATION("Clock:    %u:%u:%u:%u\n", ((cgbl_cartridge_clock_read(CGBL_CLOCK_DAY_HIGH) << 8) | cgbl_cartridge_clock_read(CGBL_CLOCK_DAY_LOW)) & 511,
+            cgbl_cartridge_clock_read(CGBL_CLOCK_HOUR), cgbl_cartridge_clock_read(CGBL_CLOCK_MINUTE), cgbl_cartridge_clock_read(CGBL_CLOCK_SECOND));
+    }
+    return CGBL_SUCCESS;
+}
+
+static cgbl_error_e cgbl_debug_command_clock_latch(const char **const arguments, uint8_t length)
+{
+    cgbl_cartridge_clock_latch();
+    return CGBL_SUCCESS;
+}
+
+static cgbl_error_e cgbl_debug_command_clock_read(const char **const arguments, uint8_t length)
+{
+    cgbl_clock_e clock = cgbl_debug_clock(arguments[1]);
+    if (clock >= CGBL_CLOCK_MAX)
+    {
+        CGBL_TRACE_ERROR("Unsupported clock: \"%s\"\n", arguments[1]);
+        return CGBL_FAILURE;
+    }
+    CGBL_TRACE_INFORMATION("%02X (%u)", cgbl_cartridge_clock_read(clock));
+    return CGBL_SUCCESS;
+}
+
+static cgbl_error_e cgbl_debug_command_clock_write(const char **const arguments, uint8_t length)
+{
+    cgbl_clock_e clock = cgbl_debug_clock(arguments[1]);
+    if (clock >= CGBL_CLOCK_MAX)
+    {
+        CGBL_TRACE_ERROR("Unsupported clock: \"%s\"\n", arguments[1]);
+        return CGBL_FAILURE;
+    }
+    cgbl_cartridge_clock_write(clock, strtol(arguments[2], NULL, 16));
     return CGBL_SUCCESS;
 }
 
@@ -467,6 +602,12 @@ static cgbl_error_e cgbl_debug_command_disassemble(const char **const arguments,
         }
     }
     cgbl_debug_disassemble(address, offset);
+    return CGBL_SUCCESS;
+}
+
+static cgbl_error_e cgbl_debug_command_exit(const char **const arguments, uint8_t length)
+{
+    CGBL_TRACE_INFORMATION("Exiting\n");
     return CGBL_SUCCESS;
 }
 
@@ -721,6 +862,10 @@ static cgbl_error_e cgbl_debug_command_version(const char **const arguments, uin
 
 static cgbl_error_e (*const COMMAND[CGBL_COMMAND_MAX])(const char **const arguments, uint8_t length) = {
     cgbl_debug_command_exit,
+    cgbl_debug_command_cartridge,
+    cgbl_debug_command_clock_latch,
+    cgbl_debug_command_clock_read,
+    cgbl_debug_command_clock_write,
     cgbl_debug_command_disassemble,
     cgbl_debug_command_help,
     cgbl_debug_command_interrupt,
@@ -745,7 +890,10 @@ static void cgbl_debug_header(void)
 {
     const cgbl_version_t *const version = cgbl_version();
     CGBL_TRACE_INFORMATION("CGBL %u.%u-%x\n", version->major, version->minor, version->patch);
-    CGBL_TRACE_INFORMATION("Path: %s\n", (debug.path && strlen(debug.path)) ? debug.path : "Undefined");
+    if (debug.path && strlen(debug.path))
+    {
+        CGBL_TRACE_INFORMATION("Path: %s\n", debug.path);
+    }
 }
 
 static const char *cgbl_debug_prompt(void)

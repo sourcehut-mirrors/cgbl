@@ -49,6 +49,10 @@ cgbl --scale [1-8] rom.gbc
 |Command             |Description                  |
 |:-------------------|:----------------------------|
 |exit                |Exit debug console           |
+|cart                |Display cartridge information|
+|clkl                |Latch clock                  |
+|clkr clk            |Read data from clock         |
+|clkw clk data       |Write data to clock          |
 |dasm addr [off]     |Disassemble instructions     |
 |help                |Display help information     |
 |itr int             |Interrupt bus                |

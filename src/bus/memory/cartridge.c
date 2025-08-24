@@ -114,7 +114,7 @@ static struct {
 
 static void cgbl_cartridge_hash_reset(void)
 {
-    const char *title = (const char *)&cartridge.rom.data[0x134];
+    const char *title = (const char *)&cartridge.rom.data[CGBL_CARTRIDGE_HEADER_TITLE_BEGIN];
     for (uint8_t index = 0; index < 16; ++index)
     {
         cartridge.hash += title[index];
@@ -123,7 +123,7 @@ static void cgbl_cartridge_hash_reset(void)
 
 static cgbl_error_e cgbl_cartridge_mapper_reset(void)
 {
-    uint8_t type = cartridge.rom.data[0x147];
+    uint8_t type = cartridge.rom.data[CGBL_CARTRIDGE_HEADER_MAPPER];
     for (uint8_t index = 1; index < CGBL_LENGTH(MAPPER); ++index)
     {
         if (type == MAPPER[index].type)
@@ -153,7 +153,7 @@ static cgbl_error_e cgbl_cartridge_ram_reset(cgbl_bank_t *const bank)
     {
         return CGBL_ERROR("Invalid ram length: %u bytes", bank->length);
     }
-    if ((count = cartridge.rom.data[0x149]) >= CGBL_LENGTH(RAM))
+    if ((count = cartridge.rom.data[CGBL_CARTRIDGE_HEADER_RAM]) >= CGBL_LENGTH(RAM))
     {
         return CGBL_ERROR("Unsupported ram type: %02X", count);
     }
@@ -197,15 +197,15 @@ static cgbl_error_e cgbl_cartridge_rom_reset(const cgbl_bank_t *const bank)
     {
         return CGBL_ERROR("Invalid rom length: %u bytes", bank->length);
     }
-    for (uint16_t address = 0x134; address < 0x14D; ++address)
+    for (uint16_t address = CGBL_CARTRIDGE_HEADER_TITLE_BEGIN; address <= CGBL_CARTRIDGE_HEADER_TITLE_END; ++address)
     {
         checksum = checksum - bank->data[address] - 1;
     }
-    if (checksum != bank->data[0x14D])
+    if (checksum != bank->data[CGBL_CARTRIDGE_HEADER_CHECKSUM])
     {
         return CGBL_ERROR("Invalid rom checksum: %02X", checksum);
     }
-    if ((count = bank->data[0x148]) >= CGBL_LENGTH(ROM))
+    if ((count = bank->data[CGBL_CARTRIDGE_HEADER_ROM]) >= CGBL_LENGTH(ROM))
     {
         return CGBL_ERROR("Unsupported rom type: %02X", count);
     }
@@ -220,7 +220,7 @@ static cgbl_error_e cgbl_cartridge_rom_reset(const cgbl_bank_t *const bank)
 
 static void cgbl_cartridge_title_reset(void)
 {
-    const char *title = (const char *)&cartridge.rom.data[0x134];
+    const char *title = (const char *)&cartridge.rom.data[CGBL_CARTRIDGE_HEADER_TITLE_BEGIN];
     for (uint8_t index = 0; index < CGBL_LENGTH(cartridge.title); ++index)
     {
         cartridge.title[index] = title[index];
