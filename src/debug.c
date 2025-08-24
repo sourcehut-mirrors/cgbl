@@ -202,7 +202,6 @@ INSTRUCTION[][CGBL_INSTRUCTION_MAX] =
     },
 };
 
-
 static const char *INTERRUPT[CGBL_INTERRUPT_MAX] = {
     "vblk", "lcdc", "tmr", "ser",
     "joy",
