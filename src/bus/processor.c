@@ -2208,13 +2208,9 @@ void cgbl_processor_reset(void)
     processor.interrupt.flag.raw = 0xE0;
 }
 
-cgbl_error_e cgbl_processor_step(uint16_t breakpoint)
+cgbl_error_e cgbl_processor_step(void)
 {
     cgbl_error_e result = CGBL_SUCCESS;
-    if (processor.pc.word == breakpoint)
-    {
-        return CGBL_BREAKPOINT;
-    }
     for (uint8_t cycle = 0; cycle < ((cgbl_bus_speed() == CGBL_SPEED_DOUBLE) ? 2 : 1); ++cycle)
     {
         if (!processor.delay)
@@ -2256,7 +2252,17 @@ cgbl_error_e cgbl_processor_step(uint16_t breakpoint)
         }
         --processor.delay;
     }
-    if ((result == CGBL_SUCCESS) && !processor.delay)
+    return result;
+}
+
+cgbl_error_e cgbl_processor_step_breakpoint(uint16_t breakpoint)
+{
+    cgbl_error_e result = CGBL_SUCCESS;
+    if (processor.pc.word == breakpoint)
+    {
+        return CGBL_BREAKPOINT;
+    }
+    if (((result = cgbl_processor_step()) == CGBL_SUCCESS) && !processor.delay)
     {
         result = CGBL_QUIT;
     }

@@ -99,7 +99,7 @@ static cgbl_error_e cgbl_run_release(void)
             }
             break;
         }
-        if ((result = cgbl_bus_run(0xFFFF)) != CGBL_SUCCESS)
+        if ((result = cgbl_bus_run()) != CGBL_SUCCESS)
         {
             if (result != CGBL_QUIT)
             {

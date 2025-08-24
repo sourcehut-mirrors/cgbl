@@ -168,12 +168,35 @@ cgbl_error_e cgbl_bus_reset(const cgbl_bank_t *const rom, cgbl_bank_t *const ram
     return result;
 }
 
-cgbl_error_e cgbl_bus_run(uint16_t breakpoint)
+cgbl_error_e cgbl_bus_run(void)
 {
     cgbl_error_e result = CGBL_SUCCESS;
     for (;;)
     {
-        if ((result = cgbl_processor_step(breakpoint)) != CGBL_SUCCESS)
+        if ((result = cgbl_processor_step()) != CGBL_SUCCESS)
+        {
+            break;
+        }
+        cgbl_audio_step();
+        cgbl_cartridge_step();
+        cgbl_infrared_step();
+        cgbl_input_step();
+        cgbl_serial_step();
+        cgbl_timer_step();
+        if ((result = cgbl_video_step()) != CGBL_SUCCESS)
+        {
+            break;
+        }
+    }
+    return result;
+}
+
+cgbl_error_e cgbl_bus_run_breakpoint(uint16_t breakpoint)
+{
+    cgbl_error_e result = CGBL_SUCCESS;
+    for (;;)
+    {
+        if ((result = cgbl_processor_step_breakpoint(breakpoint)) != CGBL_SUCCESS)
         {
             if (result != CGBL_QUIT)
             {
@@ -215,7 +238,7 @@ cgbl_error_e cgbl_bus_step(uint16_t breakpoint)
     cgbl_error_e result = CGBL_SUCCESS;
     for (;;)
     {
-        if ((result = cgbl_processor_step(breakpoint)) != CGBL_SUCCESS)
+        if ((result = cgbl_processor_step_breakpoint(breakpoint)) != CGBL_SUCCESS)
         {
             if (result == CGBL_QUIT)
             {

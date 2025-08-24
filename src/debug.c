@@ -655,7 +655,7 @@ static cgbl_error_e cgbl_debug_command_run(const char **const arguments, uint8_t
             }
             break;
         }
-        if ((result = cgbl_bus_run(breakpoint)) != CGBL_SUCCESS)
+        if ((result = cgbl_bus_run_breakpoint(breakpoint)) != CGBL_SUCCESS)
         {
             if (result != CGBL_QUIT)
             {

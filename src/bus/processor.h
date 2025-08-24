@@ -195,7 +195,8 @@ cgbl_error_e cgbl_processor_register_read(cgbl_register_e reg, cgbl_register_t *
 cgbl_error_e cgbl_processor_register_write(cgbl_register_e reg, const cgbl_register_t *const data);
 uint8_t cgbl_processor_read(uint16_t address);
 void cgbl_processor_reset(void);
-cgbl_error_e cgbl_processor_step(uint16_t breakpoint);
+cgbl_error_e cgbl_processor_step(void);
+cgbl_error_e cgbl_processor_step_breakpoint(uint16_t breakpoint);
 bool cgbl_processor_stopped(void);
 void cgbl_processor_write(uint16_t address, uint8_t data);
 
