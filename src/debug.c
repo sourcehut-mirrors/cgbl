@@ -962,7 +962,7 @@ cgbl_error_e cgbl_debug_entry(const char *const path, const cgbl_bank_t *const r
             }
             else if ((length < OPTION[command].min) || (length > OPTION[command].max))
             {
-                CGBL_TRACE_ERROR("Command usage: %s\n", OPTION[command].usage);
+                CGBL_TRACE_ERROR("Command usage: %s %s\n", OPTION[command].name, OPTION[command].usage);
                 CGBL_TRACE_WARNING("Type '%s' for more information\n", OPTION[CGBL_COMMAND_HELP].name);
             }
             else if ((result = COMMAND[command](arguments, length)) == CGBL_FAILURE)
