@@ -46,25 +46,39 @@ cgbl --scale [1-8] rom.gbc
 
 ## Debugger
 
-|Command             |Description                  |
-|:-------------------|:----------------------------|
-|exit                |Exit debug console           |
-|cart                |Display cartridge information|
-|clkl                |Latch clock                  |
-|clkr clk            |Read data from clock         |
-|clkw clk data       |Write data to clock          |
-|dasm addr [off]     |Disassemble instructions     |
-|help                |Display help information     |
-|itr int             |Interrupt bus                |
-|memr addr [off]     |Read data from memory        |
-|memw addr data [off]|Write data to memory         |
-|proc                |Display processor information|
-|regr reg            |Read data from register      |
-|regw reg data       |Write data to register       |
-|rst                 |Reset bus                    |
-|run [bp]            |Run to breakpoint            |
-|step [bp]           |Step to next instruction     |
-|ver                 |Display version information  |
+```
+Options:
+   exit                        Exit debug console
+   cart                        Display cartridge information
+   clkl                        Latch clock
+   clkr   clk                  Read data from clock
+   clkw   clk data             Write data to clock
+   dasm   dasm addr [off]      Disassemble instructions
+   help                        Display help information
+   itr    int                  Interrupt bus
+   memr   addr [off]           Read data from memory
+   memw   addr data [off]      Write data to memory
+   proc                        Display processor information
+   regr   reg                  Read data from register
+   regw   reg data             Write data to register
+   rst                         Reset bus
+   run    [bp]                 Run to breakpoint
+   step   [bp]                 Step to next instruction
+   ver                         Display version information
+```
+
+```bash
+# To read data from the clock, run the following debug command
+clkr [sec|min|hr|dayl|dayh]
+# To write data to the clock, run the following debug command
+clkw [sec|min|hr|dayl|dayh] data
+# To interrupt the bus, run the following debug command
+itr [vblk|lcdc|tmr|ser|joy]
+# To read data from a register, run the following debug command
+regr [a|af|b|bc|c|d|de|e|f|h|hl|l|pc|sp]
+# To write data to a register, run the following debug command
+regw [a|af|b|bc|c|d|de|e|f|h|hl|l|pc|sp] data
+```
 
 ## Keybindings
 

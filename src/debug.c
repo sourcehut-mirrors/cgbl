@@ -243,23 +243,23 @@ static const struct {
     uint8_t min;
     uint8_t max;
 } OPTION[CGBL_COMMAND_MAX] = {
-    { .name = "exit", .description = "Exit debug console", .usage = "exit", .min = 1, .max = 1, },
-    { .name = "cart", .description = "Display cartridge information", .usage = "cart", .min = 1, .max = 1, },
-    { .name = "clkl", .description = "Latch clock", .usage = "clkl", .min = 1, .max = 1, },
-    { .name = "clkr", .description = "Read data from clock", .usage = "clkr clk", .min = 2, .max = 2, },
-    { .name = "clkw", .description = "Write data to clock", .usage = "clkw clk data", .min = 3, .max = 3, },
+    { .name = "exit", .description = "Exit debug console", .usage = "", .min = 1, .max = 1, },
+    { .name = "cart", .description = "Display cartridge information", .usage = "", .min = 1, .max = 1, },
+    { .name = "clkl", .description = "Latch clock", .usage = "", .min = 1, .max = 1, },
+    { .name = "clkr", .description = "Read data from clock", .usage = "clk", .min = 2, .max = 2, },
+    { .name = "clkw", .description = "Write data to clock", .usage = "clk data", .min = 3, .max = 3, },
     { .name = "dasm", .description = "Disassemble instructions", .usage = "dasm addr [off]", .min = 2, .max = 3, },
-    { .name = "help", .description = "Display help information", .usage = "help", .min = 1, .max = 1, },
-    { .name = "itr", .description = "Interrupt bus", .usage = "itr int", .min = 2, .max = 2, },
-    { .name = "memr", .description = "Read data from memory", .usage = "memr addr [off]", .min = 2, .max = 3, },
-    { .name = "memw", .description = "Write data to memory", .usage = "memw addr data [off]", .min = 3, .max = 4, },
-    { .name = "proc", .description = "Display processor information", .usage = "proc", .min = 1, .max = 1, },
-    { .name = "regr", .description = "Read data from register", .usage = "regr reg", .min = 2, .max = 2, },
-    { .name = "regw", .description = "Write data to register", .usage = "regw reg data", .min = 3, .max = 3, },
-    { .name = "rst", .description = "Reset bus", .usage = "rst", .min = 1, .max = 1, },
-    { .name = "run", .description = "Run to breakpoint", .usage = "run [bp]", .min = 1, .max = 2, },
-    { .name = "step", .description = "Step to next instruction", .usage = "step [bp]", .min = 1, .max = 2, },
-    { .name = "ver", .description = "Display version information", .usage = "ver", .min = 1, .max = 1, },
+    { .name = "help", .description = "Display help information", .usage = "", .min = 1, .max = 1, },
+    { .name = "itr", .description = "Interrupt bus", .usage = "int", .min = 2, .max = 2, },
+    { .name = "memr", .description = "Read data from memory", .usage = "addr [off]", .min = 2, .max = 3, },
+    { .name = "memw", .description = "Write data to memory", .usage = "addr data [off]", .min = 3, .max = 4, },
+    { .name = "proc", .description = "Display processor information", .usage = "", .min = 1, .max = 1, },
+    { .name = "regr", .description = "Read data from register", .usage = "reg", .min = 2, .max = 2, },
+    { .name = "regw", .description = "Write data to register", .usage = "reg data", .min = 3, .max = 3, },
+    { .name = "rst", .description = "Reset bus", .usage = "", .min = 1, .max = 1, },
+    { .name = "run", .description = "Run to breakpoint", .usage = "[bp]", .min = 1, .max = 2, },
+    { .name = "step", .description = "Step to next instruction", .usage = "[bp]", .min = 1, .max = 2, },
+    { .name = "ver", .description = "Display version information", .usage = "", .min = 1, .max = 1, },
 };
 
 static const char *REGISTER[CGBL_REGISTER_MAX] = {
@@ -612,11 +612,18 @@ static cgbl_error_e cgbl_debug_command_exit(const char **const arguments, uint8_
 
 static cgbl_error_e cgbl_debug_command_help(const char **const arguments, uint8_t length)
 {
+    CGBL_TRACE_INFORMATION("Options:\n");
     for (cgbl_command_e command = 0; command < CGBL_COMMAND_MAX; ++command)
     {
-        char buffer[22] = {};
-        snprintf(buffer, sizeof (buffer), "%s", OPTION[command].usage);
-        for (uint32_t offset = strlen(buffer); offset < sizeof (buffer); ++offset)
+        uint32_t offset = 0;
+        char buffer[32] = {};
+        snprintf(buffer, sizeof (buffer), "   %s", OPTION[command].name);
+        for (offset = strlen(buffer); offset < 10; ++offset)
+        {
+            buffer[offset] = (offset == (sizeof (buffer) - 1)) ? '\0' : ' ';
+        }
+        snprintf(buffer + strlen(buffer), sizeof (buffer) - strlen(buffer), "%s", OPTION[command].usage);
+        for (offset = strlen(buffer); offset < sizeof (buffer); ++offset)
         {
             buffer[offset] = (offset == (sizeof (buffer) - 1)) ? '\0' : ' ';
         }
