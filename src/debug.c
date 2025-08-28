@@ -248,7 +248,7 @@ static const struct {
     { .name = "clkl", .description = "Latch clock", .usage = "", .min = 1, .max = 1, },
     { .name = "clkr", .description = "Read data from clock", .usage = "clk", .min = 2, .max = 2, },
     { .name = "clkw", .description = "Write data to clock", .usage = "clk data", .min = 3, .max = 3, },
-    { .name = "dasm", .description = "Disassemble instructions", .usage = "dasm addr [off]", .min = 2, .max = 3, },
+    { .name = "dasm", .description = "Disassemble instructions", .usage = "addr [off]", .min = 2, .max = 3, },
     { .name = "help", .description = "Display help information", .usage = "", .min = 1, .max = 1, },
     { .name = "itr", .description = "Interrupt bus", .usage = "int", .min = 2, .max = 2, },
     { .name = "memr", .description = "Read data from memory", .usage = "addr [off]", .min = 2, .max = 3, },
