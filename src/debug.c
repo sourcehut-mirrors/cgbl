@@ -508,7 +508,6 @@ static cgbl_error_e cgbl_debug_command_cartridge(const char **const arguments, u
             {
                 break;
             }
-
         }
         CGBL_TRACE_INFORMATION("Title:    %s\n", strlen(title) ? title : "UNDEFINED");
         value = cgbl_bus_read(CGBL_CARTRIDGE_HEADER_ROM);
