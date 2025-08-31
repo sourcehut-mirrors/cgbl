@@ -693,6 +693,11 @@ static cgbl_error_e cgbl_debug_command_memory_write(const char **const arguments
     for (uint32_t index = address; index < address + offset; ++index)
     {
         cgbl_bus_write(index, data.low);
+        if (cgbl_bus_read(index) != data.low)
+        {
+            CGBL_TRACE_ERROR("Failed to write memory: [%04X] %02X\n", index, data.low);
+            return CGBL_FAILURE;
+        }
     }
     return CGBL_SUCCESS;
 }
