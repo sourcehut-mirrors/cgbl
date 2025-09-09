@@ -37,11 +37,11 @@ Options:
 # To launch with a rom, run the following command
 cgbl rom.gbc
 # To launch with debug mode enabled, run the following command
-cgbl --debug rom.gbc
+cgbl -d rom.gbc
 # To launch with a fullscreen window, run the following command
-cgbl --fullscreen rom.gbc
+cgbl -f rom.gbc
 # To launch with a scaled window, run the following command
-cgbl --scale [1-8] rom.gbc
+cgbl -s scale rom.gbc
 ```
 
 ## Debugger
@@ -68,16 +68,28 @@ Options:
 ```
 
 ```bash
-# To read data from the clock, run the following debug command
-clkr [sec|min|hr|dayl|dayh]
-# To write data to the clock, run the following debug command
-clkw [sec|min|hr|dayl|dayh] data
-# To interrupt the bus, run the following debug command
-itr [vblk|lcdc|tmr|ser|joy]
-# To read data from a register, run the following debug command
-regr [a|af|b|bc|c|d|de|e|f|h|hl|l|pc|sp]
-# To write data to a register, run the following debug command
-regw [a|af|b|bc|c|d|de|e|f|h|hl|l|pc|sp] data
+# Supported clock types
+#  sec: Seconds
+#  min: Minutes
+#  hr: Hours
+#  dayl: Day (LSB)
+#  dayh: Day (MSB)
+clk=sec|min|hr|dayl|dayh
+# Supported interrupt types
+#  vblk: Vblank interrupt
+#  lcdc: Screen interrupt
+#  tmr: Timer interrupt
+#  ser: Serial interrupt
+#  joy: Input interrupt
+int=vblk|lcdc|tmr|ser|joy
+# Supported register types
+#  a/af/f: AF registers
+#  b/bc/c: BC registers
+#  d/de/e: DE registers
+#  h/hl/l: HL registers
+#  pc: Program-counter register
+#  sp: Stack-pointer register
+reg=a|af|b|bc|c|d|de|e|f|h|hl|l|pc|sp
 ```
 
 ## Keybindings
