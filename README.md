@@ -14,7 +14,7 @@ git clone https://git.sr.ht/~dajolly/cgbl
 cd cgbl
 # The default client uses the SDL3 library
 # To use a different library, redefine CLIENT
-make CLIENT=[sdl2|sdl3]
+make CLIENT=client
 # The default installation directory is /usr/local
 # To install into a different directory, redefine PREFIX
 sudo make install PREFIX=/your/path
