@@ -20,8 +20,8 @@ sudo make install
 # The default client uses the SDL3 library
 # To use a different library, redefine CLIENT
 # Supported client types
-#  sdl2: SDL 2 client
-#  sdl3: SDL 3 client
+#  sdl2: SDL2 client
+#  sdl3: SDL3 client
 make CLIENT=client
 # The default installation directory is /usr/local
 # To install into a different directory, redefine PREFIX
