@@ -1,0 +1,8 @@
+# SPDX-FileCopyrightText: 2025 David Jolly <jolly.a.david@gmail.com>
+# SPDX-License-Identifier: MIT
+
+BasedOnStyle: LLVM
+Language: C
+ColumnLimit: 140
+IndentWidth: 4
+Cpp11BracedListStyle: false

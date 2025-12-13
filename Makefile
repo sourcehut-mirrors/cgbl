@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2025 David Jolly <jolly.a.david@gmail.com>
 # SPDX-License-Identifier: MIT
 
-CC       := gcc
+CC       := clang
 CLIENT	 := sdl3
 CFLAGS   := -march=native -std=c23 -Wall -Werror -Wextra -Wno-unused-parameter -flto=auto -fpie -O3 -DNDEBUG -DCLIENT_$(CLIENT)
 PREFIX   := /usr/local
@@ -10,6 +10,7 @@ TARGET   := cgbl
 INCLUDES := $(subst src,-Isrc,$(shell find src -type d))
 OBJECTS  := $(patsubst %.c,%.o,$(shell find src -name "*.c"))
 PATCH    := $(shell git rev-parse --short HEAD)
+SOURCES  := $(shell find src -name "*.c" -o -name "*.h")
 
 LDFLAGS  := $(shell pkg-config readline --cflags)
 LDLIBS   := $(shell pkg-config readline --libs)
@@ -29,6 +30,10 @@ all: patch $(TARGET)
 .PHONY: clean
 clean:
 	@rm -f $(OBJECTS) $(TARGET)
+
+.PHONY: format
+format:
+	@for source in $(SOURCES); do clang-format -i $$source; done
 
 .PHONY: install
 install: install-bin install-docs

@@ -33,8 +33,7 @@
 #define CGBL_AUDIO_SAMPLES 798
 #define CGBL_AUDIO_VOLUME 0xFF24
 
-#define CGBL_AUDIO_RAM_WIDTH \
-    CGBL_WIDTH(CGBL_AUDIO_RAM_BEGIN, CGBL_AUDIO_RAM_END)
+#define CGBL_AUDIO_RAM_WIDTH CGBL_WIDTH(CGBL_AUDIO_RAM_BEGIN, CGBL_AUDIO_RAM_END)
 
 void cgbl_audio_interrupt(void);
 uint8_t cgbl_audio_read(uint16_t address);

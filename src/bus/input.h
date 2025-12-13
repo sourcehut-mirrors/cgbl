@@ -19,7 +19,7 @@ typedef enum {
     CGBL_BUTTON_LEFT,
     CGBL_BUTTON_UP,
     CGBL_BUTTON_DOWN,
-    CGBL_BUTTON_MAX,
+    CGBL_BUTTON_MAX
 } cgbl_button_e;
 
 bool (*cgbl_input_button(void))[CGBL_BUTTON_MAX];

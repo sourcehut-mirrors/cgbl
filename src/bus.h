@@ -12,23 +12,11 @@
 #define CGBL_BUS_PRIORITY 0xFF6C
 #define CGBL_BUS_SPEED 0xFF4D
 
-typedef enum {
-    CGBL_MODE_DMG = 0,
-    CGBL_MODE_CGB,
-    CGBL_MODE_MAX,
-} cgbl_mode_e;
+typedef enum { CGBL_MODE_DMG = 0, CGBL_MODE_CGB, CGBL_MODE_MAX } cgbl_mode_e;
 
-typedef enum {
-    CGBL_PRIORITY_DMG = 0,
-    CGBL_PRIORITY_CGB,
-    CGBL_PRIORITY_MAX,
-} cgbl_priority_e;
+typedef enum { CGBL_PRIORITY_DMG = 0, CGBL_PRIORITY_CGB, CGBL_PRIORITY_MAX } cgbl_priority_e;
 
-typedef enum {
-    CGBL_SPEED_NORMAL = 0,
-    CGBL_SPEED_DOUBLE,
-    CGBL_SPEED_MAX,
-} cgbl_speed_e;
+typedef enum { CGBL_SPEED_NORMAL = 0, CGBL_SPEED_DOUBLE, CGBL_SPEED_MAX } cgbl_speed_e;
 
 typedef struct {
     uint32_t length;

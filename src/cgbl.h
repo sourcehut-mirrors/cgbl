@@ -9,12 +9,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-typedef enum {
-    CGBL_SUCCESS = 0,
-    CGBL_FAILURE,
-    CGBL_BREAKPOINT,
-    CGBL_QUIT,
-} cgbl_error_e;
+typedef enum { CGBL_SUCCESS = 0, CGBL_FAILURE, CGBL_BREAKPOINT, CGBL_QUIT } cgbl_error_e;
 
 typedef struct {
     bool debug;

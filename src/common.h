@@ -10,14 +10,11 @@
 
 #define CGBL_VERSION_MAJOR 0
 #define CGBL_VERSION_MINOR 2
-#define CGBL_VERSION_PATCH 0x0aba6de
+#define CGBL_VERSION_PATCH 0xaa801ea
 
-#define CGBL_ERROR(_FORMAT_, ...) \
-    cgbl_error_set(__FILE__, __LINE__, _FORMAT_, ##__VA_ARGS__)
-#define CGBL_LENGTH(_ARRAY_) \
-    (sizeof (_ARRAY_) / sizeof (*(_ARRAY_)))
-#define CGBL_WIDTH(_BEGIN_, _END_) \
-    (((_END_) + 1) - (_BEGIN_))
+#define CGBL_ERROR(_FORMAT_, ...) cgbl_error_set(__FILE__, __LINE__, _FORMAT_, ##__VA_ARGS__)
+#define CGBL_LENGTH(_ARRAY_) (sizeof(_ARRAY_) / sizeof(*(_ARRAY_)))
+#define CGBL_WIDTH(_BEGIN_, _END_) (((_END_) + 1) - (_BEGIN_))
 
 cgbl_error_e cgbl_buffer_allocate(uint8_t **const buffer, uint32_t length);
 void cgbl_buffer_free(uint8_t *const buffer);
