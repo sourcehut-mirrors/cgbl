@@ -96,7 +96,9 @@ static void cgbl_client_controller_sync(const SDL_ControllerDeviceEvent *const d
     }
 }
 
-static void cgbl_client_frame_begin(void) { client.frame.begin = SDL_GetPerformanceCounter(); }
+static void cgbl_client_frame_begin(void) {
+    client.frame.begin = SDL_GetPerformanceCounter();
+}
 
 static float cgbl_client_frame_elapsed(void) {
     return ((float)(SDL_GetPerformanceCounter() - client.frame.begin) / (float)SDL_GetPerformanceFrequency()) * 1000.0f;

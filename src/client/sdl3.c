@@ -62,7 +62,9 @@ static cgbl_error_e cgbl_client_audio_sync(void) {
     return CGBL_SUCCESS;
 }
 
-static void cgbl_client_frame_begin(void) { client.frame.begin = SDL_GetPerformanceCounter(); }
+static void cgbl_client_frame_begin(void) {
+    client.frame.begin = SDL_GetPerformanceCounter();
+}
 
 static float cgbl_client_frame_elapsed(void) {
     return ((SDL_GetPerformanceCounter() - client.frame.begin) / (float)SDL_GetPerformanceFrequency()) * 1000.f;

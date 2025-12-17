@@ -2121,7 +2121,9 @@ static void cgbl_processor_service(void) {
     }
 }
 
-bool cgbl_processor_halted(void) { return processor.halted; }
+bool cgbl_processor_halted(void) {
+    return processor.halted;
+}
 
 void cgbl_processor_interrupt(cgbl_interrupt_e interrupt) {
     cgbl_processor_write(CGBL_PROCESSOR_INTERRUPT_FLAG, cgbl_processor_read(CGBL_PROCESSOR_INTERRUPT_FLAG) | (1 << interrupt));
@@ -2293,7 +2295,9 @@ cgbl_error_e cgbl_processor_step_breakpoint(uint16_t breakpoint) {
     return result;
 }
 
-bool cgbl_processor_stopped(void) { return processor.stopped; }
+bool cgbl_processor_stopped(void) {
+    return processor.stopped;
+}
 
 void cgbl_processor_write(uint16_t address, uint8_t data) {
     switch (address) {

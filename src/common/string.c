@@ -22,4 +22,6 @@ cgbl_error_e cgbl_string_allocate(char **const string, const char *const format,
     return result;
 }
 
-void cgbl_string_free(char *const string) { cgbl_buffer_free((uint8_t *const)string); }
+void cgbl_string_free(char *const string) {
+    cgbl_buffer_free((uint8_t *const)string);
+}

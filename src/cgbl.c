@@ -66,7 +66,9 @@ static void cgbl_rom_unload(void) {
     }
 }
 
-static cgbl_error_e cgbl_run_debug(void) { return cgbl_debug_entry(cgbl.path, &cgbl.rom.bank, &cgbl.ram.bank); }
+static cgbl_error_e cgbl_run_debug(void) {
+    return cgbl_debug_entry(cgbl.path, &cgbl.rom.bank, &cgbl.ram.bank);
+}
 
 static cgbl_error_e cgbl_run_release(void) {
     cgbl_error_e result = CGBL_SUCCESS;

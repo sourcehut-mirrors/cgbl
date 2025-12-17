@@ -202,7 +202,9 @@ static void cgbl_cartridge_title_reset(void) {
     }
 }
 
-void cgbl_cartridge_clock_latch(void) { memcpy(&cartridge.clock.latch, cartridge.ram.clock, sizeof(*cartridge.ram.clock)); }
+void cgbl_cartridge_clock_latch(void) {
+    memcpy(&cartridge.clock.latch, cartridge.ram.clock, sizeof(*cartridge.ram.clock));
+}
 
 uint8_t cgbl_cartridge_clock_read(cgbl_clock_e clock) {
     uint8_t result = 0xFF;
@@ -255,9 +257,13 @@ uint8_t cgbl_cartridge_palette_hash(char *const disambiguation) {
     return cartridge.hash;
 }
 
-uint16_t cgbl_cartridge_ram_count(void) { return cartridge.ram.count; }
+uint16_t cgbl_cartridge_ram_count(void) {
+    return cartridge.ram.count;
+}
 
-uint8_t cgbl_cartridge_ram_read(uint16_t bank, uint16_t address) { return cartridge.ram.data[(bank * CGBL_CARTRIDGE_RAM_WIDTH) + address]; }
+uint8_t cgbl_cartridge_ram_read(uint16_t bank, uint16_t address) {
+    return cartridge.ram.data[(bank * CGBL_CARTRIDGE_RAM_WIDTH) + address];
+}
 
 void cgbl_cartridge_ram_write(uint16_t bank, uint16_t address, uint8_t data) {
     cartridge.ram.data[(bank * CGBL_CARTRIDGE_RAM_WIDTH) + address] = data;
@@ -288,9 +294,13 @@ cgbl_error_e cgbl_cartridge_reset(const cgbl_bank_t *const rom, cgbl_bank_t *con
     return result;
 }
 
-uint16_t cgbl_cartridge_rom_count(void) { return cartridge.rom.count; }
+uint16_t cgbl_cartridge_rom_count(void) {
+    return cartridge.rom.count;
+}
 
-uint8_t cgbl_cartridge_rom_read(uint16_t bank, uint16_t address) { return cartridge.rom.data[(bank * CGBL_CARTRIDGE_ROM_WIDTH) + address]; }
+uint8_t cgbl_cartridge_rom_read(uint16_t bank, uint16_t address) {
+    return cartridge.rom.data[(bank * CGBL_CARTRIDGE_ROM_WIDTH) + address];
+}
 
 void cgbl_cartridge_step(void) {
     if (!cartridge.clock.delay) {
@@ -315,7 +325,9 @@ void cgbl_cartridge_step(void) {
     --cartridge.clock.delay;
 }
 
-const char *cgbl_cartridge_title(void) { return cartridge.title; }
+const char *cgbl_cartridge_title(void) {
+    return cartridge.title;
+}
 
 void cgbl_cartridge_write(uint16_t address, uint8_t data) {
     if (cartridge.mapper->write) {

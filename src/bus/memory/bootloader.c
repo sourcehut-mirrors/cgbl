@@ -17,7 +17,9 @@ static struct {
     bool enabled;
 } bootloader = {};
 
-bool cgbl_bootloader_enabled(void) { return bootloader.enabled; }
+bool cgbl_bootloader_enabled(void) {
+    return bootloader.enabled;
+}
 
 uint8_t cgbl_bootloader_read(uint16_t address) {
     uint8_t result = 0xFF;

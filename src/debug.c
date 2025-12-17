@@ -853,7 +853,9 @@ static cgbl_error_e cgbl_debug_command_register_write(const char **const argumen
     return cgbl_processor_register_write(reg, &data);
 }
 
-static cgbl_error_e cgbl_debug_command_reset(const char **const arguments, uint8_t length) { return cgbl_bus_reset(debug.rom, debug.ram); }
+static cgbl_error_e cgbl_debug_command_reset(const char **const arguments, uint8_t length) {
+    return cgbl_bus_reset(debug.rom, debug.ram);
+}
 
 static cgbl_error_e cgbl_debug_command_run(const char **const arguments, uint8_t length) {
     uint16_t breakpoint = 0xFFFF;

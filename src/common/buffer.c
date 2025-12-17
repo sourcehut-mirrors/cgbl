@@ -13,4 +13,6 @@ cgbl_error_e cgbl_buffer_allocate(uint8_t **const buffer, uint32_t length) {
     return CGBL_SUCCESS;
 }
 
-void cgbl_buffer_free(uint8_t *const buffer) { free(buffer); }
+void cgbl_buffer_free(uint8_t *const buffer) {
+    free(buffer);
+}

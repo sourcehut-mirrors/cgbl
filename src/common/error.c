@@ -10,7 +10,9 @@
 
 static char error[256] = {};
 
-const char *cgbl_error(void) { return error; }
+const char *cgbl_error(void) {
+    return error;
+}
 
 cgbl_error_e cgbl_error_set(const char *const path, uint32_t line, const char *const format, ...) {
     va_list arguments;

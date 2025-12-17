@@ -38,9 +38,13 @@ static struct {
     } speed;
 } bus = {};
 
-cgbl_mode_e cgbl_bus_mode(void) { return bus.mode.dmg ? CGBL_MODE_DMG : CGBL_MODE_CGB; }
+cgbl_mode_e cgbl_bus_mode(void) {
+    return bus.mode.dmg ? CGBL_MODE_DMG : CGBL_MODE_CGB;
+}
 
-cgbl_priority_e cgbl_bus_priority(void) { return bus.priority.dmg ? CGBL_PRIORITY_DMG : CGBL_PRIORITY_CGB; }
+cgbl_priority_e cgbl_bus_priority(void) {
+    return bus.priority.dmg ? CGBL_PRIORITY_DMG : CGBL_PRIORITY_CGB;
+}
 
 uint8_t cgbl_bus_read(uint16_t address) {
     uint8_t result = 0xFF;
@@ -195,7 +199,9 @@ cgbl_error_e cgbl_bus_run_breakpoint(uint16_t breakpoint) {
     return result;
 }
 
-cgbl_speed_e cgbl_bus_speed(void) { return bus.speed.doubled ? CGBL_SPEED_DOUBLE : CGBL_SPEED_NORMAL; }
+cgbl_speed_e cgbl_bus_speed(void) {
+    return bus.speed.doubled ? CGBL_SPEED_DOUBLE : CGBL_SPEED_NORMAL;
+}
 
 bool cgbl_bus_speed_change(void) {
     if (bus.speed.armed) {
