@@ -9,9 +9,21 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef enum { CGBL_COLOR_WHITE = 0, CGBL_COLOR_GREY_LIGHT, CGBL_COLOR_GREY_DARK, CGBL_COLOR_BLACK, CGBL_COLOR_MAX } cgbl_color_e;
+typedef enum {
+    CGBL_COLOR_WHITE = 0,
+    CGBL_COLOR_GREY_LIGHT,
+    CGBL_COLOR_GREY_DARK,
+    CGBL_COLOR_BLACK,
+    CGBL_COLOR_MAX
+} cgbl_color_e;
 
-typedef enum { CGBL_STATE_HBLANK = 0, CGBL_STATE_VBLANK, CGBL_STATE_SEARCH, CGBL_STATE_TRANSFER, CGBL_STATE_MAX } cgbl_state_e;
+typedef enum {
+    CGBL_STATE_HBLANK = 0,
+    CGBL_STATE_VBLANK,
+    CGBL_STATE_SEARCH,
+    CGBL_STATE_TRANSFER,
+    CGBL_STATE_MAX
+} cgbl_state_e;
 
 static const struct {
     uint8_t hash;

@@ -6,4 +6,5 @@ Language: C
 ColumnLimit: 140
 IndentWidth: 4
 Cpp11BracedListStyle: false
-AllowShortFunctionsOnASingleLine: None
+AllowShortEnumsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: false

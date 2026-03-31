@@ -61,7 +61,7 @@ Options:
    clkl                        Latch clock
    clkr   clk                  Read data from clock
    clkw   clk data             Write data to clock
-   dasm   dasm addr [off]      Disassemble instructions
+   dasm   addr [off]           Disassemble instructions
    help                        Display help information
    itr    int                  Interrupt bus
    memr   addr [off]           Read data from memory
@@ -83,6 +83,9 @@ Options:
 #  dayl: Day (LSB)
 #  dayh: Day (MSB)
 clk=sec|min|hr|dayl|dayh
+```
+
+```bash
 # Supported interrupt types
 #  vblk: Vblank interrupt
 #  lcdc: Screen interrupt
@@ -90,6 +93,9 @@ clk=sec|min|hr|dayl|dayh
 #  ser: Serial interrupt
 #  joy: Input interrupt
 int=vblk|lcdc|tmr|ser|joy
+```
+
+```bash
 # Supported register types
 #  a/af/f: AF registers
 #  b/bc/c: BC registers

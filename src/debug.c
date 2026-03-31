@@ -39,9 +39,20 @@ typedef enum {
     CGBL_COMMAND_MAX
 } cgbl_command_e;
 
-typedef enum { CGBL_LEVEL_ERROR = 0, CGBL_LEVEL_WARNING, CGBL_LEVEL_INFORMATION, CGBL_LEVEL_PROMPT, CGBL_LEVEL_MAX } cgbl_level_e;
+typedef enum {
+    CGBL_LEVEL_ERROR = 0,
+    CGBL_LEVEL_WARNING,
+    CGBL_LEVEL_INFORMATION,
+    CGBL_LEVEL_PROMPT,
+    CGBL_LEVEL_MAX
+} cgbl_level_e;
 
-typedef enum { CGBL_OPERAND_NONE = 0, CGBL_OPERAND_BYTE, CGBL_OPERAND_WORD, CGBL_OPERAND_MAX } cgbl_operand_e;
+typedef enum {
+    CGBL_OPERAND_NONE = 0,
+    CGBL_OPERAND_BYTE,
+    CGBL_OPERAND_WORD,
+    CGBL_OPERAND_MAX
+} cgbl_operand_e;
 
 static const char *CLOCK[CGBL_CLOCK_MAX] = { "", "sec", "min", "hr", "dayl", "dayh" };
 
