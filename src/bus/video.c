@@ -156,25 +156,25 @@ typedef struct {
 } cgbl_object_entry_t;
 
 typedef union {
+    uint8_t raw;
     struct {
         uint8_t white : 2;
         uint8_t grey_light : 2;
         uint8_t grey_dark : 2;
         uint8_t black : 2;
     };
-    uint8_t raw;
 } cgbl_palette_t;
 
 static struct {
     bool shown;
     struct {
         union {
+            uint8_t raw;
             struct {
                 uint8_t address : 6;
                 uint8_t : 1;
                 uint8_t increment : 1;
             };
-            uint8_t raw;
         } control;
         struct {
             uint16_t cgb[8][CGBL_COLOR_MAX];
@@ -183,6 +183,7 @@ static struct {
         } color;
     } background;
     union {
+        uint8_t raw;
         struct {
             uint8_t background_enabled : 1;
             uint8_t object_enabled : 1;
@@ -193,7 +194,6 @@ static struct {
             uint8_t window_map : 1;
             uint8_t enabled : 1;
         };
-        uint8_t raw;
     } control;
     struct {
         uint8_t coincidence;
@@ -203,12 +203,12 @@ static struct {
     struct {
         cgbl_object_t ram[CGBL_VIDEO_RAM_OBJECT_WIDTH];
         union {
+            uint8_t raw;
             struct {
                 uint8_t address : 6;
                 uint8_t : 1;
                 uint8_t increment : 1;
             };
-            uint8_t raw;
         } control;
         struct {
             uint16_t cgb[8][CGBL_COLOR_MAX];
@@ -228,10 +228,10 @@ static struct {
     struct {
         uint8_t data[2][CGBL_VIDEO_RAM_WIDTH];
         union {
+            uint8_t raw;
             struct {
                 uint8_t select : 1;
             };
-            uint8_t raw;
         } bank;
     } ram;
     struct {
@@ -239,6 +239,7 @@ static struct {
         uint8_t y;
     } scroll;
     union {
+        uint8_t raw;
         struct {
             uint8_t state : 2;
             uint8_t coincidence : 1;
@@ -247,31 +248,30 @@ static struct {
             uint8_t interrupt_search : 1;
             uint8_t interrupt_coincidence : 1;
         };
-        uint8_t raw;
     } status;
     struct {
         bool active;
         uint16_t offset;
         union {
+            uint8_t raw;
             struct {
                 uint8_t length : 7;
                 uint8_t hblank : 1;
             };
-            uint8_t raw;
         } control;
         union {
+            uint16_t word;
             struct {
                 uint8_t low;
                 uint8_t high;
             };
-            uint16_t word;
         } destination;
         union {
+            uint16_t word;
             struct {
                 uint8_t low;
                 uint8_t high;
             };
-            uint16_t word;
         } source;
         struct {
             uint8_t address;
@@ -773,7 +773,7 @@ cgbl_error_e cgbl_video_step(void) {
             video.line.y = 0;
             video.shown = true;
             video.window.counter = 0;
-            result = CGBL_QUIT;
+            result = CGBL_COMPLETE;
         }
     }
     return result;

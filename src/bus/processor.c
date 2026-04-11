@@ -8,11 +8,11 @@
 #include <string.h>
 
 typedef union {
+    uint8_t raw;
     struct {
         uint8_t : 4;
         uint8_t input : 1;
     };
-    uint8_t raw;
 } cgbl_interrupt_t;
 
 static struct {
@@ -2290,7 +2290,7 @@ cgbl_error_e cgbl_processor_step_breakpoint(uint16_t breakpoint) {
         return CGBL_BREAKPOINT;
     }
     if (((result = cgbl_processor_step()) == CGBL_SUCCESS) && !processor.delay) {
-        result = CGBL_QUIT;
+        result = CGBL_COMPLETE;
     }
     return result;
 }

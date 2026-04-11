@@ -520,8 +520,10 @@ typedef enum {
 } cgbl_register_e;
 
 typedef union {
+    uint16_t word;
     struct {
         union {
+            uint8_t low;
             struct {
                 uint8_t : 4;
                 uint8_t carry : 1;
@@ -529,11 +531,9 @@ typedef union {
                 uint8_t negative : 1;
                 uint8_t zero : 1;
             };
-            uint8_t low;
         };
         uint8_t high;
     };
-    uint16_t word;
 } cgbl_register_t;
 
 bool cgbl_processor_halted(void);

@@ -8,9 +8,13 @@
 
 #include "cgbl.h"
 
+#ifndef PATCH
+#define PATCH 0
+#endif
+
 #define CGBL_VERSION_MAJOR 0
 #define CGBL_VERSION_MINOR 2
-#define CGBL_VERSION_PATCH 0x0a2fbf2
+#define CGBL_VERSION_PATCH PATCH
 
 #define CGBL_ERROR(_FORMAT_, ...) cgbl_error_set(__FILE__, __LINE__, _FORMAT_, ##__VA_ARGS__)
 #define CGBL_LENGTH(_ARRAY_) (sizeof(_ARRAY_) / sizeof(*(_ARRAY_)))

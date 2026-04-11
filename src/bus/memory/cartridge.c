@@ -14,16 +14,16 @@
 
 typedef struct __attribute__((packed)) {
     union {
-        uint8_t counter : 6;
         uint8_t raw;
+        uint8_t counter : 6;
     } second;
     union {
-        uint8_t counter : 6;
         uint8_t raw;
+        uint8_t counter : 6;
     } minute;
     union {
-        uint8_t counter : 5;
         uint8_t raw;
+        uint8_t counter : 5;
     } hour;
     union {
         struct {

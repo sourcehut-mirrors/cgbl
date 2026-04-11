@@ -26,39 +26,39 @@ static struct {
         uint8_t position;
         uint8_t volume;
         union {
+            uint8_t raw;
             struct {
                 uint8_t period : 3;
                 uint8_t direction : 1;
                 uint8_t volume : 4;
             };
-            uint8_t raw;
         } envelope;
         struct {
             uint8_t low;
             union {
+                uint8_t raw;
                 struct {
                     uint8_t period : 3;
                     uint8_t : 3;
                     uint8_t enabled : 1;
                     uint8_t trigger : 1;
                 };
-                uint8_t raw;
             } high;
         } frequency;
         union {
+            uint8_t raw;
             struct {
                 uint8_t timer : 6;
                 uint8_t duty : 2;
             };
-            uint8_t raw;
         } length;
         union {
+            uint8_t raw;
             struct {
                 uint8_t shift : 3;
                 uint8_t direction : 1;
                 uint8_t period : 3;
             };
-            uint8_t raw;
         } sweep;
         struct {
             uint8_t length;
@@ -77,31 +77,31 @@ static struct {
         uint8_t position;
         uint8_t volume;
         union {
+            uint8_t raw;
             struct {
                 uint8_t period : 3;
                 uint8_t direction : 1;
                 uint8_t volume : 4;
             };
-            uint8_t raw;
         } envelope;
         struct {
             uint8_t low;
             union {
+                uint8_t raw;
                 struct {
                     uint8_t period : 3;
                     uint8_t : 3;
                     uint8_t enabled : 1;
                     uint8_t trigger : 1;
                 };
-                uint8_t raw;
             } high;
         } frequency;
         union {
+            uint8_t raw;
             struct {
                 uint8_t timer : 6;
                 uint8_t duty : 2;
             };
-            uint8_t raw;
         } length;
         struct {
             uint8_t length;
@@ -115,30 +115,30 @@ static struct {
         uint8_t length;
         uint8_t position;
         union {
+            uint8_t raw;
             struct {
                 uint8_t : 7;
                 uint8_t enabled : 1;
             };
-            uint8_t raw;
         } control;
         struct {
             uint8_t low;
             union {
+                uint8_t raw;
                 struct {
                     uint8_t period : 3;
                     uint8_t : 3;
                     uint8_t enabled : 1;
                     uint8_t trigger : 1;
                 };
-                uint8_t raw;
             } high;
         } frequency;
         union {
+            uint8_t raw;
             struct {
                 uint8_t : 5;
                 uint8_t output : 2;
             };
-            uint8_t raw;
         } level;
         struct {
             uint16_t length;
@@ -149,6 +149,7 @@ static struct {
         uint16_t sample;
         uint8_t volume;
         union {
+            uint8_t raw;
             struct {
                 struct {
                     uint8_t : 6;
@@ -156,30 +157,29 @@ static struct {
                     uint8_t trigger : 1;
                 };
             };
-            uint8_t raw;
         } control;
         union {
+            uint8_t raw;
             struct {
                 uint8_t period : 3;
                 uint8_t direction : 1;
                 uint8_t volume : 4;
             };
-            uint8_t raw;
         } envelope;
         union {
+            uint8_t raw;
             struct {
                 uint8_t divider : 3;
                 uint8_t width : 1;
                 uint8_t shift : 4;
             };
-            uint8_t raw;
         } frequency;
         union {
+            uint8_t raw;
             struct {
                 uint8_t timer : 6;
                 uint8_t : 2;
             };
-            uint8_t raw;
         } length;
         struct {
             uint8_t length;
@@ -189,6 +189,7 @@ static struct {
         } timer;
     } channel_4;
     union {
+        uint8_t raw;
         struct {
             uint8_t channel_1_enabled : 1;
             uint8_t channel_2_enabled : 1;
@@ -197,9 +198,9 @@ static struct {
             uint8_t : 3;
             uint8_t enabled : 1;
         };
-        uint8_t raw;
     } control;
     union {
+        uint8_t raw;
         struct {
             uint8_t channel_1_right : 1;
             uint8_t channel_2_right : 1;
@@ -210,16 +211,15 @@ static struct {
             uint8_t channel_3_left : 1;
             uint8_t channel_4_left : 1;
         };
-        uint8_t raw;
     } mixer;
     union {
+        uint8_t raw;
         struct {
             uint8_t right : 3;
             uint8_t : 1;
             uint8_t left : 3;
             uint8_t : 1;
         };
-        uint8_t raw;
     } volume;
 } audio = {};
 

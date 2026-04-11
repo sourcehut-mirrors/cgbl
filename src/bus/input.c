@@ -15,12 +15,12 @@ static struct {
         bool next[CGBL_BUTTON_MAX];
     } button;
     union {
+        uint8_t raw;
         struct {
             uint8_t pressed : 4;
             uint8_t direction : 1;
             uint8_t button : 1;
         };
-        uint8_t raw;
     } state;
 } input = {};
 

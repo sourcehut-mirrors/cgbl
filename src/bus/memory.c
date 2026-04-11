@@ -13,10 +13,10 @@ static struct {
     } high;
     struct {
         union {
+            uint8_t raw;
             struct {
                 uint8_t select : 3;
             };
-            uint8_t raw;
         } bank;
         uint8_t ram[8][CGBL_MEMORY_RAM_WORK_WIDTH];
     } work;

@@ -74,13 +74,13 @@ static cgbl_error_e cgbl_run_release(void) {
     cgbl_error_e result = CGBL_SUCCESS;
     for (;;) {
         if ((result = cgbl_client_poll()) != CGBL_SUCCESS) {
-            if (result == CGBL_QUIT) {
+            if (result == CGBL_COMPLETE) {
                 result = CGBL_SUCCESS;
             }
             break;
         }
         if ((result = cgbl_bus_run()) != CGBL_SUCCESS) {
-            if (result != CGBL_QUIT) {
+            if (result != CGBL_COMPLETE) {
                 if (result == CGBL_BREAKPOINT) {
                     result = CGBL_SUCCESS;
                 }

@@ -12,13 +12,13 @@ static struct {
     uint8_t data;
     uint16_t divider;
     union {
+        uint8_t raw;
         struct {
             uint8_t select : 1;
             uint8_t speed : 1;
             uint8_t : 5;
             uint8_t enabled : 1;
         };
-        uint8_t raw;
     } control;
 } serial = {};
 

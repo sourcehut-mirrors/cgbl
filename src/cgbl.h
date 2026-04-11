@@ -13,7 +13,7 @@ typedef enum {
     CGBL_SUCCESS = 0,
     CGBL_FAILURE,
     CGBL_BREAKPOINT,
-    CGBL_QUIT
+    CGBL_COMPLETE
 } cgbl_error_e;
 
 typedef struct {

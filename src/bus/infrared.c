@@ -10,13 +10,13 @@ static struct {
     bool overflow;
     uint16_t divider;
     union {
+        uint8_t raw;
         struct {
             uint8_t emitting : 1;
             uint8_t receiving : 1;
             uint8_t : 4;
             uint8_t enabled : 2;
         };
-        uint8_t raw;
     } control;
 } infrared = {};
 

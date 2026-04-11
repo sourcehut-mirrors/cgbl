@@ -876,13 +876,13 @@ static cgbl_error_e cgbl_debug_command_run(const char **const arguments, uint8_t
     }
     for (;;) {
         if ((result = cgbl_client_poll()) != CGBL_SUCCESS) {
-            if (result == CGBL_QUIT) {
+            if (result == CGBL_COMPLETE) {
                 result = CGBL_SUCCESS;
             }
             break;
         }
         if ((result = cgbl_bus_run_breakpoint(breakpoint)) != CGBL_SUCCESS) {
-            if (result != CGBL_QUIT) {
+            if (result != CGBL_COMPLETE) {
                 if (result == CGBL_BREAKPOINT) {
                     CGBL_TRACE_WARNING("Breakpoint: %04X\n", breakpoint);
                     result = CGBL_SUCCESS;
@@ -908,7 +908,7 @@ static cgbl_error_e cgbl_debug_command_step(const char **const arguments, uint8_
         cgbl_debug_disassemble(reg.word, 1);
     }
     if ((result = cgbl_client_poll()) != CGBL_SUCCESS) {
-        if (result == CGBL_QUIT) {
+        if (result == CGBL_COMPLETE) {
             result = CGBL_SUCCESS;
         }
         return result;
@@ -978,8 +978,7 @@ cgbl_error_e cgbl_debug_entry(const char *const path, const cgbl_bank_t *const r
         rl_attempted_completion_function = cgbl_debug_completion;
         if ((input = readline(cgbl_debug_prompt())) && strlen(input)) {
             uint8_t length = 0;
-            char *argument = NULL;
-            const char *arguments[5] = {};
+            const char *argument = NULL, *arguments[5] = {};
             add_history(input);
             argument = strtok(input, " ");
             while (argument) {

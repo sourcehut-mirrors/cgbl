@@ -16,25 +16,25 @@
 
 static struct {
     union {
+        uint8_t raw;
         struct {
             uint8_t : 2;
             uint8_t dmg : 1;
         };
-        uint8_t raw;
     } mode;
     union {
+        uint8_t raw;
         struct {
             uint8_t dmg : 1;
         };
-        uint8_t raw;
     } priority;
     union {
+        uint8_t raw;
         struct {
             uint8_t armed : 1;
             uint8_t : 6;
             uint8_t doubled : 1;
         };
-        uint8_t raw;
     } speed;
 } bus = {};
 
@@ -182,7 +182,7 @@ cgbl_error_e cgbl_bus_run_breakpoint(uint16_t breakpoint) {
     cgbl_error_e result = CGBL_SUCCESS;
     for (;;) {
         if ((result = cgbl_processor_step_breakpoint(breakpoint)) != CGBL_SUCCESS) {
-            if (result != CGBL_QUIT) {
+            if (result != CGBL_COMPLETE) {
                 break;
             }
         }
@@ -216,7 +216,7 @@ cgbl_error_e cgbl_bus_step(uint16_t breakpoint) {
     cgbl_error_e result = CGBL_SUCCESS;
     for (;;) {
         if ((result = cgbl_processor_step_breakpoint(breakpoint)) != CGBL_SUCCESS) {
-            if (result == CGBL_QUIT) {
+            if (result == CGBL_COMPLETE) {
                 result = CGBL_SUCCESS;
             }
             break;

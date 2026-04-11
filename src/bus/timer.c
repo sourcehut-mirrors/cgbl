@@ -15,11 +15,11 @@ static struct {
     uint16_t divider;
     uint8_t modulo;
     union {
+        uint8_t raw;
         struct {
             uint8_t mode : 2;
             uint8_t enabled : 1;
         };
-        uint8_t raw;
     } control;
     struct {
         bool audio;

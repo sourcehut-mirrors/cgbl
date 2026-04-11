@@ -245,7 +245,7 @@ cgbl_error_e cgbl_client_poll(void) {
             cgbl_client_keyboard_sync(&event.key);
             break;
         case SDL_EVENT_QUIT:
-            return CGBL_QUIT;
+            return CGBL_COMPLETE;
         default:
             break;
         }

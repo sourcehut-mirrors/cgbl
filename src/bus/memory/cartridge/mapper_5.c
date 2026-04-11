@@ -8,11 +8,11 @@
 
 static struct {
     union {
+        uint16_t raw;
         struct {
             uint16_t low : 8;
             uint16_t high : 1;
         };
-        uint16_t raw;
     } bank;
     struct {
         bool enabled;
